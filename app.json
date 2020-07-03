@@ -1,0 +1,16 @@
+{
+  "name": "Bundesrat Scraper",
+  "description": "Auswertung der Abstimmungsverhalten der einzelnen Bundesländer im Bundesrat",
+  "image": "heroku/python",
+  "repository": "https://github.com/heroku/python-getting-started",
+  "keywords": ["python", "django" ],
+  "addons": [ "heroku-postgresql" ],
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "python manage.py collectstatic --noinput",
+        "test": "python manage.py test"
+      }
+    }
+  }
+}
