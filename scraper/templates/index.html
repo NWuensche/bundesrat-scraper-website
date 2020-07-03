@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+      <p>
+            <a class="btn btn-default" href="{% url 'tef' %}">Weitere Anfragen</a>
+      </p>
+
+      <form class="form-group" method="POST" action="send/">
+        {% csrf_token %}
+        <input type="text" name="textfield">
+
+        <button class="btn btn-default" type="submit">Upload text</button>
+      </form>
+</div>
+{% endblock %}
