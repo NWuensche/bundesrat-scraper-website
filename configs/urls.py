@@ -15,7 +15,7 @@ import scraper.views
 # Learn more here: https://docs.djangoproject.com/en/2.1/topics/http/urls/
 
 urlpatterns = [
-    path("", hello.views.index, name="index"),
-    path("tef", hello.views.update_counter, name="tef"),
-    path("send/", hello.views.sendMethod, name="send/"),
+    path("", scraper.views.index, name="index"),
+    path("tef", scraper.views.update_counter, name="tef"),
+    path("send/", scraper.views.sendMethod, name="send/"),
 ]
