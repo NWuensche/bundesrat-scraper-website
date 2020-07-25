@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'cssJS/diagramCSSJS.html' %}
+
+
+
+
+  <div class="diagram">
+    <h2>Auswertung</h2>
+    <div class="holder"><div class="bar yes" data-value="{{yes}}"><span class="label">Zustimmung  </span></div>
+      <div class="holder"><div class="bar no" data-value="{{no}}"><span class="label">Ablehnung     </span></div>
+        <div class="holder"><div class="bar out" data-value="{{out}}"><span class="label">Enthaltung     </span></div>
+  </div>
+ 
+
+
+{% endblock %}
