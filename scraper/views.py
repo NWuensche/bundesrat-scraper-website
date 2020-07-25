@@ -36,3 +36,41 @@ def tef(request=None):
 def showDiagram(request):
     return render(request, "diagram.html", {"yes": 10, "no": 5, "out": 3})
 
+def loadJSONsInDB():
+    counties = [
+            "baden_wuerttemberg",
+            "bayern",
+            "berlin",
+            "brandenburg", 
+            "bremen",
+            "hamburg",
+            "hessen",
+            "mecklenburg_vorpommern",
+            "niedersachsen",
+            "nordrhein_westfalen",
+            "rheinland_pfalz",
+            "saarland",
+            "sachsen",
+            "sachsen_anhalt",
+            "schleswig_holstein",
+            "thueringen",
+            ]
+    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json"
+    for county in counties:
+        countyJsonUrl = jsonUrl.format(county)
+        response = requests.get(countyJsonUrl)
+        if response.status_code != 200:
+            raise Exception('{} not found'.format(countyJsonUrl))
+        #TODO rename county attribute
+        countyDBRow = Json(county = county, json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
+        countyDBRow.save()
+    
+    #bundesrat folder with Session->TOPs mapping extra
+    brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
+    #TODO remove double code
+    response = requests.get(brUrl)
+    if response.status_code != 200:
+        raise Exception('{} not found'.format(brUrl))
+    #TODO rename county attribute
+    brDBRow = Json(county = "bundesrat", json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
+    brDBRow.save()
