@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from .models import Mytest, Number
+from .models import Mytest, Number, Json
 from django.views.decorators.csrf import csrf_exempt
+
+import requests #Load JSONs if necessary
+import json #Str -> JSON,
 
 def index(request):
     return render(request, "index.html")
