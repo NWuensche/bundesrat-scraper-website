@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+{% include 'cssJS/topsSelectionChangeSession.html' %}
 
 <div class="container">
       <p>
@@ -15,5 +16,21 @@
         <button class="btn btn-default" type="submit">Upload text</button>
       </form>
     <a class="btn btn-default" href="{% url 'diagram' %}">Zu Diagram</a>
+
+        <form class="form-group" method="POST" action="loadJSON">
+      {% csrf_token %}
+      <label for="sessionNumber">Wähle eine Sitzung und einen Tagesordnungspunkt:</label>
+
+       <select name="sessionNumber" id="sessionNumber">
+            {% for sessionNumber in sessionNumbers %}
+            <option value="{{sessionNumber}}">Sitzung {{sessionNumber}}</option>
+            {% endfor %}
+       </select>
+
+       <select name ="topNumber" id="topNumber"> </select>
+
+      <button class="btn btn-default" type="submit">Zeige Texte der Bundesländer</button>
+    </form>
+
 </div>
 {% endblock %}

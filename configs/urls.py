@@ -19,4 +19,6 @@ urlpatterns = [
     path("tef", scraper.views.update_counter, name="tef"),
     path("send/", scraper.views.sendMethod, name="send/"),
     path("diagram", scraper.views.showDiagram, name="diagram"),
+    path("getTopsAJAX/", scraper.views.getTopsAJAX, name="getTopsAJAX/"),
+    path("loadJSON", scraper.views.loadJSON, name="loadJSON"),
 ]
