@@ -8,7 +8,15 @@ import requests #Load JSONs if necessary
 import json #Str -> JSON,
 
 def index(request):
-    return render(request, "index.html")
+    jsons = Json.objects.all()
+    if len(jsons) == 0: #Load 
+        loadJSONsInDB()
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    timestamp = ""
+    allTOPs = []
+    allSessionNumbers = list(map(lambda session: session["number"], brJSON))
+    return render(request, "index.html", {"sessionNumbers": allSessionNumbers})
 
 @csrf_exempt  #TODO Remove annotation
 def update_counter(request):
