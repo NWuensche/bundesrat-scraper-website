@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container">
+
+
+<h2>Senats Texts</h2>
+
+<h3>Timestamp: {{ time }}</h3>
+<h3>TOP Number: {{ top }}</h3>
+
+{% for county, senatText in countiesTexts.items %}
+    <h3>{{county}}: {{ senatText }}</h3>
+{% endfor %}
+</div>
+
+{% endblock %}
