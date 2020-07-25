@@ -1,0 +1,29 @@
+
+        <script>
+          $( window ).on( "load", function() { // Not  $(document).ready(), because if I go back from diagram page to index page, selection is not back to last entry selected, so TOPs always the ones for default Session, but then selection can be something different -> .on("load") waits until selection back to last state before computing TOPs
+                  self=$(document);
+                   updateTOPs(self); // Do on start before any change
+                 $('select#sessionNumber').change(function () { //On new session selected
+                   updateTOPs(self);
+
+                 });
+            });
+
+          function updateTOPs(a) {
+                     var optionSelected = self.find("option:selected");
+                     var sessionSelected  = optionSelected.val(); //just session number, without "Sitzung:" prefix from actual text
+                    $.ajax( 
+                        { 
+                            url: "/getTopsAJAX",  //Calculate TOPs for given Sessionnumber
+                            data:{ 
+                                     'sNumber': sessionSelected, //sessionNumber
+                                      'csrfmiddlewaretoken': jQuery("[name=csrfmiddlewaretoken]").val(), // From https://docs.djangoproject.com/en/3.0/ref/csrf/#setting-the-token-on-the-ajax-request
+                        }, 
+                        success: function( result ) {  //got new TOPs
+                            $("#topNumber option").remove(); //Remove TOPs last session from dropdown menu
+                            for (var i = result.length - 1; i >= 0; i--) {
+                                $("#topNumber").append('<option value=' + result[i].name + '> Tagesordnungspunkt '+ result[i].name +'</option>');
+
+                        } } });
+          };
+        </script>
