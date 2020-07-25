@@ -26,4 +26,12 @@ class Migration(migrations.Migration):
                 ('thenumber', models.IntegerField(verbose_name=b'the number')),
             ],
         ),
+        migrations.CreateModel(
+            name='Json',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('county', models.TextField(verbose_name="Coutry")),
+                ('json', models.TextField(verbose_name="JSON")),
+            ],
+        ),
     ]
