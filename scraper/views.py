@@ -31,3 +31,8 @@ def sendMethod(request):
 
 def tef(request=None):
     pass
+
+#TODO Calculate real votes for selected Session+TOP Pair
+def showDiagram(request):
+    return render(request, "diagram.html", {"yes": 10, "no": 5, "out": 3})
+
