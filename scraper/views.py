@@ -88,3 +88,34 @@ def loadJSONsInDB():
     #TODO rename county attribute
     brDBRow = Json(county = "bundesrat", json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
     brDBRow.save()
+
+def loadJSON(request):
+    jsons = Json.objects.all()
+    if len(jsons) == 0: #Load 
+        loadJSONsInDB()
+    sessionNumber = int(request.POST["sessionNumber"])
+    topNumber = request.POST["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
+    jsons = Json.objects.all()
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    timestamp = ""
+    allTOPs = []
+    for session in brJSON:
+        if int(session['number']) == sessionNumber:
+            timestamp = session['timestamp']
+            allTOPs = list(map(lambda top: top["number"], session["tops"]))
+            break
+
+    countySenatText = {}
+    allRows = Json.objects.all()
+    for row in allRows:
+        if row.county == "bundesrat": #TODO besser
+            continue #already processed
+        countyName = row.county
+        countyJSON = json.loads(row.json)
+        countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
+        countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {}) #{} is default, but doesn't like keyword "default"
+        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", "Kein Text in JSON gefunden")
+        countySenatText[row.county] = countySessionTOPSenatsText
+
+    return render(request, "json.html", {"time": "Timestamp of session {}: {}".format(sessionNumber, str(session['timestamp'])), "top": topNumber, "countiesTexts": countySenatText})
