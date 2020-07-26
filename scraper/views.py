@@ -114,7 +114,11 @@ def loadJSON(request):
     for session in brJSON:
         if int(session['number']) == sessionNumber:
             timestamp = session['timestamp']
-            allTOPs = list(map(lambda top: top["number"], session["tops"]))
+            for top in session["tops"]:
+                if top["number"] == topNumber:
+                    topTitle = top['title']
+                    topCategory = top.get('law_category', 'Ohne Kategorie')#Zustimmungsbedürftig/Einspruchsgesetz/None
+                    topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
             break
 
     countySenatText = {}
@@ -129,4 +133,4 @@ def loadJSON(request):
         countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", "Kein Text in JSON gefunden")
         countySenatText[row.county] = countySessionTOPSenatsText
 
-    return render(request, "json.html", {"time": "Timestamp of session {}: {}".format(sessionNumber, str(session['timestamp'])), "top": topNumber, "countiesTexts": countySenatText})
+    return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTexts": countySenatText})

@@ -5,13 +5,17 @@
   <div class="container">
 
 
-<h2>Senats Texts</h2>
 
-<h3>Timestamp: {{ time }}</h3>
-<h3>TOP Number: {{ top }}</h3>
+<h2>Sitzung: {{ sessionNumber }}</h2>
+<h2>Tagesordnungspunkt: {{ top }}</h2>
+<h2>Titel des TOPs: {{ topTitle }}</h2>
+<h2>Kategorie des TOPs: {{ topCategory }}</h2>
+<h2>Beschlusstenor im Bundesrat: {{ topTenor }}</h2>
+
+<h3>Senats Texte:</h3>
 
 {% for county, senatText in countiesTexts.items %}
-    <h3>{{county}}: {{ senatText }}</h3>
+    <h4>{{county}}: {{ senatText }}</h4>
 {% endfor %}
 </div>
 
