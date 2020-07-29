@@ -14,8 +14,12 @@
 
 <h3>Senats Texte:</h3>
 
-{% for county, senatText in countiesTexts.items %}
-    <h4>{{county}}: {{ senatText }}</h4>
+{% for county, senatTextAndPdfLink in countiesTextsAndPDFLinks.items %}
+{% if senatTextAndPdfLink.1  %} {# if pdf link not present, then no a tag , .0/.1 ist tuple access [0], [1], 1 pdflink, 0 senattext #}
+  <h4><a href="{{senatTextAndPdfLink.1 }}">{{county}}: {{ senatTextAndPdfLink.0 }}</a></h4> 
+{% else %}
+  <h4>{{county}}: {{ senatTextAndPdfLink.0 }}</h4> <!-- .0/.1 ist tuple access [0], [1], 1 pdflink, 0 senattext  -->
+{% endif %}
 {% endfor %}
 </div>
 
