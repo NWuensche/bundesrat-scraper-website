@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from .models import Mytest, Number, Json
+from .models import Mytest, Number, Json, JsonCountyPDFLinks
 from django.views.decorators.csrf import csrf_exempt
 
 import requests #Load JSONs if necessary
@@ -11,6 +11,11 @@ def index(request):
     jsons = Json.objects.all()
     if len(jsons) == 0: #Load 
         loadJSONsInDB()
+
+    jsonsPDFLinks = JsonCountyPDFLinks.objects.all()
+    if len(jsonsPDFLinks) == 0: #Load 
+        loadJSONsPDFLinksInDB()
+
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     timestamp = ""
@@ -100,10 +105,43 @@ def loadJSONsInDB():
     brDBRow = Json(county = "bundesrat", json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
     brDBRow.save()
 
+#TODO Merge with loadJSONsInDB, but no bundesrat folder used here
+def loadJSONsPDFLinksInDB():
+    counties = [
+            "baden_wuerttemberg",
+            "bayern",
+            "berlin",
+            "brandenburg", 
+            "bremen",
+            "hamburg",
+            "hessen",
+            "mecklenburg_vorpommern",
+            "niedersachsen",
+            "nordrhein_westfalen",
+            "rheinland_pfalz",
+            "saarland",
+            "sachsen",
+            "sachsen_anhalt",
+            "schleswig_holstein",
+            "thueringen",
+            ]
+    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json"
+    for county in counties:
+        countyJsonUrl = jsonUrl.format(county)
+        response = requests.get(countyJsonUrl)
+        if response.status_code != 200:
+            raise Exception('{} not found'.format(countyJsonUrl))
+        #TODO rename county attribute
+        countyDBRow = JsonCountyPDFLinks(county = county, json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
+        countyDBRow.save()
+
 def loadJSON(request):
     jsons = Json.objects.all()
     if len(jsons) == 0: #Load 
         loadJSONsInDB()
+    jsonsPDFLinks = JsonCountyPDFLinks.objects.all()
+    if len(jsonsPDFLinks) == 0: #Load 
+        loadJSONsPDFLinksInDB()
     sessionNumber = int(request.POST["sessionNumber"])
     topNumber = request.POST["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
     jsons = Json.objects.all()
