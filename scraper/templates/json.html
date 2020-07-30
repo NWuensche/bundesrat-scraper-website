@@ -6,8 +6,13 @@
 
 
 
-<h2>Sitzung: {{ sessionNumber }}</h2>
-<h2>Tagesordnungspunkt: {{ top }}</h2>
+{% if sessionURL  %}  {# Add Session Link if present #}
+  <h2><a href="{{ sessionURL }}"> Sitzung: {{ sessionNumber }} </a></h2>
+  <h2><a href="{{ sessionURL }}">Tagesordnungspunkt: {{ top }}</a></h2>
+{% else %}
+  <h2>Sitzung: {{ sessionNumber }}</h2>
+  <h2>Tagesordnungspunkt: {{ top }}</h2>
+{% endif %}
 <h2>Titel des TOPs: {{ topTitle }}</h2>
 <h2>Kategorie des TOPs: {{ topCategory }}</h2>
 <h2>Beschlusstenor im Bundesrat: {{ topTenor }}</h2>

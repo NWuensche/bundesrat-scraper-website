@@ -19,7 +19,6 @@ def index(request):
 
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
-    timestamp = ""
     allTOPs = []
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
     return render(request, "index.html", {"sessionNumbers": allSessionNumbers})
@@ -148,11 +147,11 @@ def loadJSON(request):
     jsons = Json.objects.all()
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
-    timestamp = ""
+    sessionURL = ""
     allTOPs = []
     for session in brJSON:
         if int(session['number']) == sessionNumber:
-            timestamp = session['timestamp']
+            sessionURL = session['url']
             for top in session["tops"]:
                 if top["number"] == topNumber:
                     topTitle = top['title']
@@ -178,7 +177,7 @@ def loadJSON(request):
 
         countySenatTextAndOpinionAndPDFLink[row.county] = (countySessionTOPSenatsText, opinion, pdfLinkCountyCurrentSession)
 
-    return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink})
+    return render(request, "json.html", {"sessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink})
 
 #In: some senats text
 #Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
