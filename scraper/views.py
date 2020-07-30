@@ -188,22 +188,31 @@ def extractOpinionSenatsText(senatsText):
 
     #Order important! "keine Zustimmung"(NO) before "Zustimmung" (YES)
     text = senatsText
-    text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen"], "NO" )
-    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "Kenntnisnahme der Ausschussverweisung"], "ABSTENTION" ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
+    text = replaceStringIfSomeMatchWith(text, ["abgesetzt", "Absetzung"], "DONTKNOWOPINION") # 988 7
+    text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt",
+        "Nichtfassen der Entschließung" #BAY 981 14
+        ], "NO" )
+    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], "ABSTENTION" ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
     text = replaceStringIfSomeMatchWith(text, 
             [   "keine einwendungen", 
                 "hat der Verordnung zugestimmt",
+                "Der Verordnung wurde zugestimmt",
                 "stimmte dem Gesetz zu",
                 "Anrufung des Vermittlungsausschusses nicht verlangt",
                 "Einer Überweisung an die Ausschüsse wird nicht widersprochen", #(BB - 949/42) -> Das ist für Gesetzes*entwürfe*, Ausschuss noch vor eigentlicher Gesetzeswahl (Ausschuss != Verfassungsausschuss)  -> YES
                 "Keine Anrufung Vermittlungsausschuss", #(SA - 977/1) -> Nur bei Einspruchsgesetzen -> YES
                 "Keine Anrufung des Vermittlungsausschusses",
                 "Keine Anrufung VA",
+                "Keine VA-Anrufung",
+                "keine Unterstützung",
+                "Keine Anrufung des VA",
                 "Zu den Gesetzen einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
                 "Die Einberufung des Vermittlungsausschusses wurde nicht verlangt",
                 "Dem Gesetz wurde einstimmig zugestimmt",
                 "einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
                 "zustimmung",
+                "zuzustimmen",
+                "zugestimmt",
                 "Freie Hand", #Bremen 988 1a
                 "Fassen der Entschließung nach Maßgaben unterstützt",
                 "mit den Stimmen Hamburgs zugestimmt",
@@ -213,9 +222,33 @@ def extractOpinionSenatsText(senatsText):
                 "Überweisung an die Ausschüsse",
                 "Überweisung in die Ausschüsse",
                 "Ausschussüberweisung",
+                "Ausschusszuweisung",
                 "Die Vorlage wurde an die Ausschüsse zur Beratung überwiesen",
 
+                "Fassen der Entschließung", #SL 973 26
+                "Fassung der Entschließung",
+                "Entschließung fassen",
+                "Annahme der Entschließung",
+
                 "Einbringung", #For "Gesetzesanträge" (985 15)
+                "Entsprechend den Anregungen und Vorschlägen zu beschließen",
+                "Den Vorlagen ohne Änderung zuzustimmen",
+                "Den Gesetzen zuzustimmen",
+                "Dem Wahlvorschlag wird zugestimmt", #In the Context of electing people
+                "Stellungnahme des Bundesrates unterstützt",
+                "Stellungnahme des Bundesrates überwiegend unterstützt",
+                "Ein Antrag auf Anrufung des Vermittlungsausschusses lag nicht vor",
+                "Erteilen der Entlastung",
+                "Erteilung der Entlastung",
+                "Entlastung erteilen",
+                "Die Entschließung zu fassen",
+                "Entlastung", #SL
+                "Die Landesregierung hat dem Benennungsvorschlag zugestimmt",
+                "Die Landesregierung hat den Benennungsvorschlägen zugestimmt",
+                "Die Landesregierung hat der Verordnung nach Maßgaben zugestimmt",
+                "Zuleitung der Verordnung",
+                "Dem Gesetz wurde zugestimmt"
+                "Dem Gesetz zuzustimmen"
             ], "YES" )
 
     return text
