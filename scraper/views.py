@@ -178,6 +178,36 @@ def loadJSON(request):
         countySenatTextAndPDFLink[row.county] = (countySessionTOPSenatsText, pdfLinkCountyCurrentSession)
     return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndPDFLinks": countySenatTextAndPDFLink})
 
+#In: some senats text
+#Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
+#Out: Else return original text
+def extractOpinionSenatsText(senatsText):
+
+    #Order important! "keine Zustimmung"(NO) before "Zustimmung" (YES)
+    text = senatsText
+    text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen"], "NO" )
+    text = replaceStringIfSomeMatchWith(text, ["enthaltung"], "ABSTENTION" ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
+    text = replaceStringIfSomeMatchWith(text, 
+            [   "keine einwendungen", 
+                "hat der Verordnung zugestimmt",
+                "stimmte dem Gesetz zu",
+                "Anrufung des Vermittlungsausschusses nicht verlangt",
+                "Einer Überweisung an die Ausschüsse wird nicht widersprochen", #(BB - 949/42) -> Das ist für Gesetzes*entwürfe*, Ausschuss noch vor eigentlicher Gesetzeswahl (Ausschuss != Verfassungsausschuss)  -> YES
+                "Keine Anrufung Vermittlungsausschuss", #(SA - 977/1) -> Nur bei Einspruchsgesetzen -> YES
+                "Keine Anrufung des Vermittlungsausschusses",
+                "Keine Anrufung VA",
+                "Zu den Gesetzen einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
+                "Die Einberufung des Vermittlungsausschusses wurde nicht verlangt",
+                "Dem Gesetz wurde einstimmig zugestimmt",
+                "einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
+                "zustimmung",
+                "Freie Hand", #Bremen 988 1a
+                "Fassen der Entschließung nach Maßgaben unterstützt",
+                "mit den Stimmen Hamburgs zugestimmt",
+            ], "YES" )
+
+    return text
+
 #In: String to match against (Will all be lower cased in the end)
 #In: List of strings/words to match
 #In: Replacement string if some match in string
