@@ -160,7 +160,7 @@ def loadJSON(request):
                     topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
             break
 
-    countySenatTextAndPDFLink = {}
+    countySenatTextAndOpinionAndPDFLink = {}
     allRows = Json.objects.all()
     for row in allRows:
         if row.county == "bundesrat": #TODO besser
@@ -169,14 +169,16 @@ def loadJSON(request):
         countyJSON = json.loads(row.json)
         countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
         countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {}) #{} is default, but doesn't like keyword "default"
-        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", "Kein Text in JSON gefunden")
+        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", "Keinen Text in JSON gefunden")
+        opinion = extractOpinionSenatsText(countySessionTOPSenatsText)
 
         pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyName)
         pdfLinksAbstimmungsverhaltenJSON = json.loads(pdfLinksAbstimmungsverhaltenRow.json)
         pdfLinkCountyCurrentSession = pdfLinksAbstimmungsverhaltenJSON.get(str(sessionNumber), "") #No pdf for county and session ? -> empty link
 
-        countySenatTextAndPDFLink[row.county] = (countySessionTOPSenatsText, pdfLinkCountyCurrentSession)
-    return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndPDFLinks": countySenatTextAndPDFLink})
+        countySenatTextAndOpinionAndPDFLink[row.county] = (countySessionTOPSenatsText, opinion, pdfLinkCountyCurrentSession)
+
+    return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink})
 
 #In: some senats text
 #Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
