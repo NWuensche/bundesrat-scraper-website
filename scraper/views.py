@@ -167,8 +167,10 @@ def loadJSON(request):
         countyName = row.county
         countyJSON = json.loads(row.json)
         countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
-        countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {}) #{} is default, but doesn't like keyword "default"
-        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", "Keinen Text in JSON gefunden")
+        countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {"senat": "Abstimmungsverhalten nicht öffentlich einsehbar"}) #To keep flow, add "No Text" string as dict (NO PDF - Case)
+        NOTHING_FOUND = "Keine Aussage zum Abstimmungsverhalten im entsprechenden Dokument gefunden"
+        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", NOTHING_FOUND) #PDF there, but nothing for TOP found - Case
+        countySessionTOPSenatsText = countySessionTOPSenatsText if (countySessionTOPSenatsText.strip() != "")  else NOTHING_FOUND
         opinion = extractOpinionSenatsText(countySessionTOPSenatsText)
 
         pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyName)
