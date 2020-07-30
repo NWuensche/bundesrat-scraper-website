@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import requests #Load JSONs if necessary
 import json #Str -> JSON,
+import re #For senats text replacement
 
 def index(request):
     jsons = Json.objects.all()
@@ -176,3 +177,19 @@ def loadJSON(request):
 
         countySenatTextAndPDFLink[row.county] = (countySessionTOPSenatsText, pdfLinkCountyCurrentSession)
     return render(request, "json.html", {"sessionNumber": sessionNumber, "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndPDFLinks": countySenatTextAndPDFLink})
+
+#In: String to match against (Will all be lower cased in the end)
+#In: List of strings/words to match
+#In: Replacement string if some match in string
+#Out: replacement if match, else original
+def replaceStringIfSomeMatchWith(inString, toMatchList, replacement):
+
+    toMatchListLC = map(str.lower, toMatchList)
+
+    #Create big regex or with from toMatchList
+    regexStr = ".*(" + "|".join(toMatchListLC) + ")"
+    regex = re.compile(regexStr)
+
+    if regex.match(inString.lower()): #Find any string from toMatchListLC -> replace
+        return replacement
+    return inString #Nothing Found, so return original string
