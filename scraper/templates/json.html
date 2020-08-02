@@ -19,14 +19,29 @@
 
 <h3>Senats Texte:</h3>
 
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Bundesland</th>
+      <th scope="col">Verhalten</th>
+      <th scope="col">Exakter Text</th>
+    </tr>
+  </thead>
+  <tbody>
 {% for county, senatTextAndOpinionAndPdfLink in countiesTextsAndOpinionsAndPDFLinks.items %}
+<tr>
 {% if senatTextAndOpinionAndPdfLink.2  %} {# if pdf link not present, then no a tag , .0/.1/.2 ist tuple access [0], [1], 2 pdflink, .1 senat opinion,  0 senattext #}
-  <h4><a href="{{senatTextAndOpinionAndPdfLink.2 }}">{{county}}: {{ senatTextAndOpinionAndPdfLink.0 }}</a></h4> 
+  <th scope="row"><a href="{{senatTextAndOpinionAndPdfLink.2 }}">{{county}}</a></th> 
 {% else %}
-  <h4>{{county}}: {{ senatTextAndOpinionAndPdfLink.0 }}</h4>
+  <th scope="row">{{county}}</th> 
 {% endif %}
-  <h5>Meinung: {{ senatTextAndOpinionAndPdfLink.1 }}</h5>
+  <th>{{ senatTextAndOpinionAndPdfLink.1 }}</th>
+  <th>{{ senatTextAndOpinionAndPdfLink.0 }}</th>
+  {#  <h5>Meinung: {{ senatTextAndOpinionAndPdfLink.1 }}</h5> #}
 {% endfor %}
+</tr>
+ </tbody>
+</table>
 </div>
 
 
