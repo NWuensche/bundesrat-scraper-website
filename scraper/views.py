@@ -30,6 +30,12 @@ class CONSTS: #Can't use "global" vars else
             "schleswig_holstein": "Schleswig-Holstein",
             "thueringen": "Thüringen",
             }
+    OPINION_DISPLAY_NAME = {
+            "YES": "Zustimmung",
+            "NO": "Ablehnung",
+            "ABSTENTION": "Enthaltung",
+            "OTHER": "Nicht ermittelbar",
+            }
 
 def index(request):
     jsons = Json.objects.all()
@@ -209,12 +215,13 @@ def loadJSON(request):
             numABSTENTION += 1
         else: #No PDF or no Text in JSON or can't match string
             numOTHER += 1
+        opinionDisplayName = CONSTS.OPINION_DISPLAY_NAME.get(opinion, CONSTS.OPINION_DISPLAY_NAME["OTHER"])
 
         pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyDBName)
         pdfLinksAbstimmungsverhaltenJSON = json.loads(pdfLinksAbstimmungsverhaltenRow.json)
         pdfLinkCountyCurrentSession = pdfLinksAbstimmungsverhaltenJSON.get(str(sessionNumber), "") #No pdf for county and session ? -> empty link
 
-        countySenatTextAndOpinionAndPDFLink[countyRealName] = (countySessionTOPSenatsText, opinion, pdfLinkCountyCurrentSession)
+        countySenatTextAndOpinionAndPDFLink[countyRealName] = (countySessionTOPSenatsText, opinionDisplayName, pdfLinkCountyCurrentSession)
 
     return render(request, "json.html", {"sessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
 
