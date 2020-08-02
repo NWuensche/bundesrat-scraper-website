@@ -8,10 +8,28 @@ import requests #Load JSONs if necessary
 import json #Str -> JSON,
 import re #For senats text replacement
 
-class STRINGS: #Can't use "global" vars else
+class CONSTS: #Can't use "global" vars else
     YES="YES"
     NO="NO"
     ABSTENTION="ABSTENTION"
+    COUNTY_DISPLAY_NAME = {
+            "baden_wuerttemberg": "Baden-Württemberg",
+            "bayern": "Bayern",
+            "berlin": "Berlin",
+            "brandenburg": "Brandenburg", 
+            "bremen": "Bremen",
+            "hamburg": "Hamburg",
+            "hessen": "Hessen",
+            "mecklenburg_vorpommern": "Mecklenburg-Vorpommern",
+            "niedersachsen": "Niedersachsen",
+            "nordrhein_westfalen": "Nordrhein-Westfalen",
+            "rheinland_pfalz": "Rheinland-Pfalz",
+            "saarland": "Saarland",
+            "sachsen": "Sachsen",
+            "sachsen_anhalt": "Sachsen-Anhalt",
+            "schleswig_holstein": "Schleswig-Holstein",
+            "thueringen": "Thüringen",
+            }
 
 def index(request):
     jsons = Json.objects.all()
@@ -172,7 +190,8 @@ def loadJSON(request):
     for row in allRows:
         if row.county == "bundesrat": #TODO besser
             continue #already processed
-        countyName = row.county
+        countyDBName = row.county
+        countyRealName=CONSTS.COUNTY_DISPLAY_NAME[row.county]
         countyJSON = json.loads(row.json)
         countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
         countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {"senat": "Abstimmungsverhalten nicht öffentlich einsehbar"}) #To keep flow, add "No Text" string as dict (NO PDF - Case)
@@ -182,20 +201,20 @@ def loadJSON(request):
         opinion = extractOpinionSenatsText(countySessionTOPSenatsText)
 
         # Counter for diagram
-        if opinion == STRINGS.YES:
+        if opinion == CONSTS.YES:
             numYES += 1
-        elif opinion == STRINGS.NO:
+        elif opinion == CONSTS.NO:
             numNO += 1
-        elif opinion == STRINGS.ABSTENTION:
+        elif opinion == CONSTS.ABSTENTION:
             numABSTENTION += 1
         else: #No PDF or no Text in JSON or can't match string
             numOTHER += 1
 
-        pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyName)
+        pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyDBName)
         pdfLinksAbstimmungsverhaltenJSON = json.loads(pdfLinksAbstimmungsverhaltenRow.json)
         pdfLinkCountyCurrentSession = pdfLinksAbstimmungsverhaltenJSON.get(str(sessionNumber), "") #No pdf for county and session ? -> empty link
 
-        countySenatTextAndOpinionAndPDFLink[row.county] = (countySessionTOPSenatsText, opinion, pdfLinkCountyCurrentSession)
+        countySenatTextAndOpinionAndPDFLink[countyRealName] = (countySessionTOPSenatsText, opinion, pdfLinkCountyCurrentSession)
 
     return render(request, "json.html", {"sessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
 
@@ -209,8 +228,8 @@ def extractOpinionSenatsText(senatsText):
     text = replaceStringIfSomeMatchWith(text, ["abgesetzt", "Absetzung"], "DONTKNOWOPINION") # 988 7
     text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt",
         "Nichtfassen der Entschließung" #BAY 981 14
-        ], STRINGS.NO )
-    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], STRINGS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
+        ], CONSTS.NO )
+    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
     text = replaceStringIfSomeMatchWith(text, 
             [   "keine einwendungen", 
                 "hat der Verordnung zugestimmt",
@@ -267,7 +286,7 @@ def extractOpinionSenatsText(senatsText):
                 "Zuleitung der Verordnung",
                 "Dem Gesetz wurde zugestimmt"
                 "Dem Gesetz zuzustimmen"
-            ], STRINGS.YES )
+            ], CONSTS.YES )
 
     return text
 
