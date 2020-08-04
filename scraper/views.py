@@ -45,17 +45,22 @@ def initDBIfEmpty():
     if not JsonCountyPDFLinks.objects.exists(): #Load 
         loadJSONsPDFLinksInDB()
 
+#Out: List of all SessionNumbers [992, 991,...,910]
+def getSessionNumbers():
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
-    allTOPs = []
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
+    return allSessionNumbers
 
 def index(request):
     initDBIfEmpty()
 
+    sessionNumbers = getSessionNumbers()
+    return render(request, "index.html", {"sessionNumbers": sessionNumbers})
 
 def getTopsAJAX(request):
     initDBIfEmpty()
+
     sessionNumber = int(request.GET['sNumber'])
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
