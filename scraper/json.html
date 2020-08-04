@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'searchTOP.html' %}
+  <div class="container">
+
+      <div class="page-header">
+
+{% if sessionURL  %}  {# Add Session Link if present #}
+<h2><a href = "{{sessionURL}}"> TOP {{currentSessionNumber}}/{{top}} </a></h2>
+{% else %}
+<h2> TOP {{currentSessionNumber}}/{{top}} </h2>
+{% endif %}
+</h2>
+
+<p class="lead">Titel: {{ topTitle }}</p>
+<p class="lead">Kategorie: {{ topCategory }}</p>
+<p class="lead">Beschlusstenor im Bundesrat: {{ topTenor }}</p>
+
+</div>
+{% include 'cssJS/diagramCSSJS.html' %}
+
+
+
+
+<h1 class="display-1">Abstimmungsverhalten der Bundesländer</h1>
+
+  <div class="diagram">
+    <div class="holder"><div class="bar yes" data-value="{{numYes}}"><span class="label">Zustimmung       </span></div>
+      <div class="holder"><div class="bar no" data-value="{{numNo}}"><span class="label">Ablehnung          </span></div>
+        <div class="holder"><div class="bar abstention" data-value="{{numAbstention}}"><span class="label">Enthaltung          </span></div>
+        <div class="holder"><div class="bar other" data-value="{{numOther}}"><span class="label">Nicht ermittelbar</span></div>
+  </div>
+
+<h2>Texte der Bundesländer</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Bundesland</th>
+      <th scope="col">Verhalten</th>
+      <th scope="col">Exakter Text</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for county, senatTextAndOpinionAndPdfLink in countiesTextsAndOpinionsAndPDFLinks.items %}
+<tr>
+{% if senatTextAndOpinionAndPdfLink.2  %} {# if pdf link not present, then no a tag , .0/.1/.2 ist tuple access [0], [1], 2 pdflink, .1 senat opinion,  0 senattext #}
+  <th scope="row"><a href="{{senatTextAndOpinionAndPdfLink.2 }}">{{county}}</a></th> 
+{% else %}
+  <th scope="row">{{county}}</th> 
+{% endif %}
+  <th>{{ senatTextAndOpinionAndPdfLink.1 }}</th>
+  <th>{{ senatTextAndOpinionAndPdfLink.0 }}</th>
+  {#  <h5>Meinung: {{ senatTextAndOpinionAndPdfLink.1 }}</h5> #}
+{% endfor %}
+</tr>
+ </tbody>
+</table>
+</div>
+
+
+ 
+
+{% endblock %}
