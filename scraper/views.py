@@ -62,6 +62,11 @@ def index(request):
 
     return render(request, "index.html", {"sessionNumbers": sessionNumbers, "urlLatestSession": URL_LATEST_SESSION.format(latestSessionNumber)})
 
+def metaStudies(request):
+    initDBIfEmpty()
+    numZustimmLaws, numEntscheidungsLaws = getNumberLaws()
+    return render(request, "meta.html", {"numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws})
+
 def getTopsAJAX(request):
     initDBIfEmpty()
 
@@ -148,7 +153,6 @@ def loadJSON(request):
     initDBIfEmpty()
     sessionNumber = int(request.GET["sessionNumber"])
     topNumber = request.GET["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
-    jsons = Json.objects.all()
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     sessionURL = ""
@@ -289,3 +293,20 @@ def replaceStringIfSomeMatchWith(inString, toMatchList, replacement):
     if regex.match(inString.lower()): #Find any string from toMatchListLC -> replace
         return replacement
     return inString #Nothing Found, so return original string
+
+#Returns tuple of number of "Zustimmungsbedürfige Gesetze" and "Entscheidungsgesetz" across sessions 910-992
+def getNumberLaws():
+    initDBIfEmpty()
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+
+    numZustimmLaws = 0
+    numEntscheidungsLaws = 0
+    for session in brJSON:
+        for top in session["tops"]:
+            topCategory = top.get("law_category", "")
+            if topCategory == "Zustimmungsbedürftiges Gesetz":
+                numZustimmLaws += 1
+            elif topCategory == "Einspruchsgesetz":
+                numEntscheidungsLaws += 1
+    return (numZustimmLaws, numEntscheidungsLaws)
