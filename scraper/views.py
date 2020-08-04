@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from .models import Mytest, Number, Json, JsonCountyPDFLinks
+from .models import Json, JsonCountyPDFLinks
 from django.views.decorators.csrf import csrf_exempt
 
 import requests #Load JSONs if necessary
@@ -50,36 +50,8 @@ def index(request):
     brJSON = json.loads(brRow.json)
     allTOPs = []
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
-    return render(request, "index.html", {"sessionNumbers": allSessionNumbers})
 
-@csrf_exempt  #TODO Remove annotation
-def update_counter(request):
-    cou = Mytest()
-    cou.save()
 
-    cou.save()
-    cous = Mytest.objects.all()
-    message = 'update successful {}x'.format("test")
-    return render(request, "mycounter.html", {"counters": cous})
-
-def sendMethod(request):
-    numbers = Number.objects.all()
-    if len(numbers) == 0:
-        number = Number()
-        number.save()
-    number = Number.objects.first() #get (maybe new) number, only one number in DB
-    oldNumber = number.number
-
-    number.number = request.POST["textfield"]
-    number.save()
-    return render(request, "number.html", {"oldNumber": oldNumber, "newNumber": number.number, "IO": request.POST["textfield"] })
-
-def tef(request=None):
-    pass
-
-#TODO Calculate real votes for selected Session+TOP Pair
-def showDiagram(request):
-    return render(request, "diagram.html", {"yes": 10, "no": 5, "out": 3})
 
 def getTopsAJAX(request):
     jsons = Json.objects.all() #TODO Check if any, don't load all (Multiple methods here use this)
