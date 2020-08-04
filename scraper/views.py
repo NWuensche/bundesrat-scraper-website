@@ -56,7 +56,11 @@ def index(request):
     initDBIfEmpty()
 
     sessionNumbers = getSessionNumbers()
-    return render(request, "index.html", {"sessionNumbers": sessionNumbers})
+
+    URL_LATEST_SESSION="https://www.bundesrat.de/SharedDocs/TO/{}/to-node.html"
+    latestSessionNumber = max(sessionNumbers)
+
+    return render(request, "index.html", {"sessionNumbers": sessionNumbers, "urlLatestSession": URL_LATEST_SESSION.format(latestSessionNumber)})
 
 def getTopsAJAX(request):
     initDBIfEmpty()
