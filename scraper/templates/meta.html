@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include 'searchTOP.html' %}
+{% include 'cssJS/diagramCSSJS.html' %}
+
+
+
+<div class="container">
+
+      <div class="page-header">
+<h1 class="display-1">Meta-Analysen der Sitzungen 910 - 992 </h1>
+</div>
+<h2 class="display-2">Abstimmungsverhalten der Bundesländer</h2>
+
+  <div class="diagram">
+    <div class="holder"><div class="bar yes" data-value="{{numZustimmLaws}}"><span class="label">Zustimmungsbedürftige Gesetze       </span></div> {# yes and other used only because of colors #}
+        <div class="holder"><div class="bar other" data-value="{{numEntscheidungsLaws}}"><span class="label">Einspruchsgesetze</span></div>
+  </div>
+  </div>
+
+
+ 
+
+{% endblock %}
