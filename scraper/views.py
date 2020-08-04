@@ -65,7 +65,13 @@ def index(request):
 def metaStudies(request):
     initDBIfEmpty()
     numZustimmLaws, numEntscheidungsLaws = getNumberLaws()
-    return render(request, "meta.html", {"diagramMaxLenghItems": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws})
+    sessionNumbers = getSessionNumbers() #For Navbar on result site
+
+    #Need them to show where Meta-Study applies to
+    minSessionNumber = min(sessionNumbers)
+    maxSessionNumber = max(sessionNumbers)
+
+    return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramMaxLenghItems": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws})
 
 def getTopsAJAX(request):
     initDBIfEmpty()
