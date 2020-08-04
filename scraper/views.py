@@ -65,13 +65,14 @@ def index(request):
 def metaStudies(request):
     initDBIfEmpty()
     numZustimmLaws, numEntscheidungsLaws = getNumberLaws()
+    numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING = getPartitionSizesZustimmLaws()
     sessionNumbers = getSessionNumbers() #For Navbar on result site
 
     #Need them to show where Meta-Study applies to
     minSessionNumber = min(sessionNumbers)
     maxSessionNumber = max(sessionNumbers)
 
-    return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramMaxLenghItems": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws})
+    return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramMaxLenghItems": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws, "numZustimmLawsYES": numZustimmLawsYES, "numZustimmLawsNO": numZustimmLawsNO, "numZustimmLawsTOPRemoval": numZustimmLawsTOPRemoval,  "numZustimmLawsMISSING": numZustimmLawsMISSING})
 
 def getTopsAJAX(request):
     initDBIfEmpty()
@@ -316,3 +317,29 @@ def getNumberLaws():
             elif topCategory == "Einspruchsgesetz":
                 numEntscheidungsLaws += 1
     return (numZustimmLaws, numEntscheidungsLaws)
+
+#Returns 4-tuple of size of Results of Zustimmungsbedürftige Gesetze
+def getPartitionSizesZustimmLaws():
+    initDBIfEmpty()
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+
+    numZustimmLawsYES = 0
+    numZustimmLawsNO = 0
+    numZustimmLawsTOPRemoval = 0 #Not Discussed
+    numZustimmLawsMISSING = 0 #No Tenor e.g. 989 2
+    for session in brJSON:
+        for top in session["tops"]:
+            topCategory = top.get("law_category", "")
+            if topCategory == "Zustimmungsbedürftiges Gesetz":
+                tenor = top.get("beschlusstenor", "")
+                if tenor in ["Zustimmung; Entschließung", "Zustimmung; Entschließungen", "Zustimmung"]:
+                    numZustimmLawsYES += 1
+                elif tenor in ["Versagung der Zustimmung", "Anrufung des Vermittlungsausschusses", "Stellungnahme"]: #Stellungnahme from 948 1a, seems to be a NO
+                    numZustimmLawsNO += 1
+                elif tenor in ["Fristeinrede; Absetzung von TO", "Absetzung von TO"]: 
+                    numZustimmLawsTOPRemoval += 1
+                elif  tenor == "":
+                    numZustimmLawsMISSING += 1
+    return (numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING)
+
