@@ -5,6 +5,8 @@
                   lastTOP="{{top}}" //Django will add last TOP here
             updateTOPs(self, lastTOP); // Do on start before any change, select lastTOP (If present, else ""
                  $('select#sessionNumber').change(function () { //On new session selected
+                   $('select#topNumber').prop('disabled', true); //Disable until right TOPs loaded
+                   $('button#btnSubmitTOP').prop('disabled', true); //Disable until right TOPs loaded
                    updateTOPs(self);
 
                  });
@@ -30,6 +32,10 @@
                                 $("#topNumber").append('<option value=' + result[i].name + '> Tagesordnungspunkt '+ result[i].name +'</option>');
                               }
 
-                        } } });
+                        } 
+
+                   $('select#topNumber').prop('disabled', false); //Enable again after TOPs correct
+                   $('button#btnSubmitTOP').prop('disabled', false); 
+                        } });
           };
         </script>

@@ -7,7 +7,7 @@
     </div>
         <form class="navbar-form navbar-left" method="GET" action="loadJSON">
       {% csrf_token %}
-        <select class="form-control" style="text-align: center;" name="sessionNumber" id="sessionNumber" >
+        <select class="form-control"  name="sessionNumber" id="sessionNumber" >
             {% for sessionNumber in sessionNumbers %}
             {% if currentSessionNumber  and currentSessionNumber == sessionNumber %}  {# Select last selected session, if available #}
 
@@ -18,9 +18,9 @@
 
             {% endfor %}
        </select>
-       <select name ="topNumber" class="form-control" id="topNumber"> </select>
+       <select name ="topNumber" class="form-control" id="topNumber" disabled> </select>
 
-      <button class="btn btn-primary" type="submit">Auswertung Abstimmungsverhalten Bundesländer</button>
+      <button class="btn btn-primary" type="submit" id="btnSubmitTOP" disabled>Auswertung Abstimmungsverhalten Bundesländer</button>
     </form>
   </div>
 </nav>
