@@ -142,8 +142,8 @@ def loadJSONsPDFLinksInDB():
 
 def loadJSON(request):
     initDBIfEmpty()
-    sessionNumber = int(request.POST["sessionNumber"])
-    topNumber = request.POST["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
+    sessionNumber = int(request.GET["sessionNumber"])
+    topNumber = request.GET["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
     jsons = Json.objects.all()
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
