@@ -10,22 +10,22 @@
 <div class="container">
 
       <div class="page-header">
-        <h1 class="display-1">Meta-Analysen der Sitzungen {{minSessionNumber}} - {{maxSessionNumber}} </h1>
+        <h1 class="display-1">Meta-Analysen der Bundesrats-Sitzungen {{minSessionNumber}} - {{maxSessionNumber}} </h1>
 </div>
-<h2 class="display-2">Anzahl Zustimmungsbedürftiger vs. Einspruchsgesetzen</h2>
+<h2 class="display-2">Anzahl Zustimmungsbedürftiger Gesetze vs. Einspruchsgesetze</h2>
 
-  <div class="diagram">
-    <div class="holder"><div class="bar yes" data-value="{{numZustimmLaws}}"><span class="label">Zustimmungsbedürftige Gesetze       </span></div> {# yes and other used only because of colors #}
-        <div class="holder"><div class="bar other" data-value="{{numEntscheidungsLaws}}"><span class="label">Einspruchsgesetze</span></div>
+<div class="diagram" diagramSumXValues={{diagramSumLaws}}>
+    <div class="holder"><div class="bar yes" data-value="{{numZustimmLaws}}"><span class="label">Zustimmungsbedürftige Gesetze       </span></div></div> {# yes and other used only because of colors #}
+      <div class="holder"><div class="bar other" data-value="{{numEntscheidungsLaws}}"><span class="label">Einspruchsgesetze</span></div> </div>
   </div>
 
 <h2 class="display-2">Beschlusstenor Zustimmungsbedürftiger Gesetze im Bundesrat</h2>
-    <div class="diagram">
-    <div class="holder"><div class="bar yes" data-value="{{numZustimmLawsYES}}"><span class="label">Zustimmung       </span></div> {# yes and other used only because of colors #}
-    <div class="holder"><div class="bar no" data-value="{{numZustimmLawsNO}}"><span class="label">Ablehnung       </span></div> {# yes and other used only because of colors #}
-        <div class="holder"><div class="bar abstention" data-value="{{numZustimmLawsTOPRemoval}}"><span class="label">Absetzung von Tagesordnung</span></div>
+<div class="diagram" diagramSumXValues={{numZustimmLaws}}>
+      <div class="holder"><div class="bar yes" data-value="{{numZustimmLawsYES}}"><span class="label">Zustimmung       </span></div></div> {# yes and other used only because of colors #}
+      <div class="holder"><div class="bar no" data-value="{{numZustimmLawsNO}}"><span class="label">Ablehnung       </span></div></div> 
+      <div class="holder"><div class="bar abstention" data-value="{{numZustimmLawsTOPRemoval}}"><span class="label">Absetzung von Tagesordnung</span></div></div>
 
-        <div class="holder"><div class="bar other" data-value="{{numZustimmLawsMISSING}}"><span class="label">Kein Tenor vorhanden</span></div>
+      <div class="holder"><div class="bar other" data-value="{{numZustimmLawsMISSING}}"><span class="label">Kein Tenor vorhanden</span></div></div>
   </div>
 
 

@@ -72,7 +72,8 @@ setTimeout(function start (){
         offsetNumber =  $($bar.children()[1]).css("width"); //Absolute width of vote number with "px" postfix, .width() is somehow to small
         offsetNumber = offsetNumber.substring(0, offsetNumber.length - 2); // 90px -> "90"
         offsetNumberPercent = offsetNumber/ $( window ).width() * 100 ; //To subtract s.t. for 16 votes, number of votes still in 100% range and not out of bounce
-      $bar.css('width',(($bar.attr('data-value')/{{diagramMaxLenghItems}} * (100 - offsetLabelPercent - offsetNumberPercent) + offsetLabelPercent)+"%" )); {# Use diagramMaxLenghItems because use diagram for 16 counties as well ~1000 laws #}
+      diagramSumXValues=$($bar.parent().parent()).attr("diagramSumXValues");
+      $bar.css('width',(($bar.attr('data-value')/diagramSumXValues * (100 - offsetLabelPercent - offsetNumberPercent) + offsetLabelPercent)+"%" )); {# Use diagramSumXValues because use diagram for 16 counties as well ~1000 laws (different scales needed) + 2 differnt scales on same page (meta-study) #}
     }, i  );
   });
 
