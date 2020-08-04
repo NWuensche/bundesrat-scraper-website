@@ -9,7 +9,13 @@
       {% csrf_token %}
         <select class="form-control" style="text-align: center;" name="sessionNumber" id="sessionNumber" >
             {% for sessionNumber in sessionNumbers %}
-            <option value="{{sessionNumber}}">Sitzung {{sessionNumber}}</option>
+            {% if currentSessionNumber  and currentSessionNumber == sessionNumber %}  {# Select last selected session, if available #}
+
+              <option value="{{sessionNumber}}" selected>Sitzung {{sessionNumber}}</option>
+            {% else %}
+              <option value="{{sessionNumber}}">Sitzung {{sessionNumber}}</option>
+            {% endif %}
+
             {% endfor %}
        </select>
        <select name ="topNumber" class="form-control" id="topNumber"> </select>

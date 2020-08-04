@@ -8,9 +8,9 @@
       <div class="page-header">
 
 {% if sessionURL  %}  {# Add Session Link if present #}
-<h2><a href = "{{sessionURL}}"> TOP {{sessionNumber}}/{{top}} </a></h2>
+<h2><a href = "{{sessionURL}}"> TOP {{currentSessionNumber}}/{{top}} </a></h2>
 {% else %}
-<h2> TOP {{sessionNumber}}/{{top}} </h2>
+<h2> TOP {{currentSessionNumber}}/{{top}} </h2>
 {% endif %}
 </h2>
 
