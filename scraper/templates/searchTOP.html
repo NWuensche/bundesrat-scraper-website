@@ -1,0 +1,21 @@
+{% include 'cssJS/topsSelectionChangeSession.html' %}
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Unofficial Bundesrat Scraper</a>
+    </div>
+        <form class="navbar-form navbar-left" method="POST" action="loadJSON">
+      {% csrf_token %}
+        <select class="form-control" style="text-align: center;" name="sessionNumber" id="sessionNumber" >
+            {% for sessionNumber in sessionNumbers %}
+            <option value="{{sessionNumber}}">Sitzung {{sessionNumber}}</option>
+            {% endfor %}
+       </select>
+       <select name ="topNumber" class="form-control" id="topNumber"> </select>
+
+      <button class="btn btn-primary" type="submit">Auswertung Abstimmungsverhalten Bundesländer</button>
+    </form>
+  </div>
+</nav>
+
