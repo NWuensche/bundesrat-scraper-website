@@ -37,13 +37,12 @@ class CONSTS: #Can't use "global" vars else
             "OTHER": "Nicht ermittelbar",
             }
 
-def index(request):
-    jsons = Json.objects.all()
-    if len(jsons) == 0: #Load 
+#If DB is empty, load stuff
+def initDBIfEmpty():
+    if not Json.objects.exists(): #Table empty -> Load JSONs
         loadJSONsInDB()
 
-    jsonsPDFLinks = JsonCountyPDFLinks.objects.all()
-    if len(jsonsPDFLinks) == 0: #Load 
+    if not JsonCountyPDFLinks.objects.exists(): #Load 
         loadJSONsPDFLinksInDB()
 
     brRow = Json.objects.get(county="bundesrat")
@@ -51,12 +50,12 @@ def index(request):
     allTOPs = []
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
 
+def index(request):
+    initDBIfEmpty()
 
 
 def getTopsAJAX(request):
-    jsons = Json.objects.all() #TODO Check if any, don't load all (Multiple methods here use this)
-    if len(jsons) == 0: #Load 
-        loadJSONsInDB()
+    initDBIfEmpty()
     sessionNumber = int(request.GET['sNumber'])
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
@@ -137,12 +136,7 @@ def loadJSONsPDFLinksInDB():
         countyDBRow.save()
 
 def loadJSON(request):
-    jsons = Json.objects.all()
-    if len(jsons) == 0: #Load 
-        loadJSONsInDB()
-    jsonsPDFLinks = JsonCountyPDFLinks.objects.all()
-    if len(jsonsPDFLinks) == 0: #Load 
-        loadJSONsPDFLinksInDB()
+    initDBIfEmpty()
     sessionNumber = int(request.POST["sessionNumber"])
     topNumber = request.POST["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
     jsons = Json.objects.all()
