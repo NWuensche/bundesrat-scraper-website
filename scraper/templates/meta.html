@@ -12,14 +12,14 @@
       <div class="page-header">
         <h1 class="display-1">Meta-Analysen der Bundesrats-Sitzungen {{minSessionNumber}} - {{maxSessionNumber}} </h1>
 </div>
-<h2 class="display-2">Anzahl Zustimmungsbedürftiger Gesetze vs. Einspruchsgesetze</h2>
+<h2 class="display-2">Anzahl Zustimmungsbedürftiger Gesetze vs. Einspruchsgesetze (Ohne Gewähr)</h2>
 
 <div class="diagram" diagramSumXValues={{diagramSumLaws}}>
     <div class="holder"><div class="bar yes" data-value="{{numZustimmLaws}}"><span class="label">Zustimmungsbedürftige Gesetze       </span></div></div> {# yes and other used only because of colors #}
       <div class="holder"><div class="bar other" data-value="{{numEntscheidungsLaws}}"><span class="label">Einspruchsgesetze                              </span></div> </div>
   </div>
 
-<h2 class="display-2">Beschlusstenor Zustimmungsbedürftiger Gesetze im Bundesrat</h2>
+<h2 class="display-2">Beschlusstenor Zustimmungsbedürftiger Gesetze im Bundesrat (Ohne Gewähr)</h2>
 <div class="diagram" diagramSumXValues={{numZustimmLaws}}>
       <div class="holder"><div class="bar yes" data-value="{{numZustimmLawsYES}}"><span class="label">Zustimmung                              </span></div></div> {# yes and other used only because of colors #}
       <div class="holder"><div class="bar no" data-value="{{numZustimmLawsNO}}"><span class="label">Ablehnung                                 </span></div></div> 
