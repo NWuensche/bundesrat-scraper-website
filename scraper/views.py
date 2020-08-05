@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from .models import Json, JsonCountyPDFLinks
-from django.views.decorators.csrf import csrf_exempt
 
 import requests #Load JSONs if necessary
 import json #Str -> JSON,

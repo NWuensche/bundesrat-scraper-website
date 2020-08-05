@@ -9,7 +9,6 @@
       <button class="btn btn-info" type="submit"> Meta-Analysen Bundesrat</button>
       </form>
         <form class="navbar-form navbar-left" method="GET" action="loadJSON">
-      {% csrf_token %}
         <select class="form-control"  name="sessionNumber" id="sessionNumber" >
             {% for sessionNumber in sessionNumbers %}
             {% if currentSessionNumber  and currentSessionNumber == sessionNumber %}  {# Select last selected session, if available #}
