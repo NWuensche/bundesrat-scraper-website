@@ -67,7 +67,8 @@ setTimeout(function start (){
 
         offsetLabel =  $($bar.children()[0]).css("width"); //Absolute width of vote label (Zustimmung/...) with "px" postfix, .width() is somehow to small
         offsetLabel = offsetLabel.substring(0, offsetLabel.length - 2); // 90px -> "90"
-        offsetLabelPercent = offsetLabel/ $( window ).width() * 100 ; //To add s.t. 0 for 0 votes is visible too
+        d = $("div.container")
+        offsetLabelPercent = offsetLabel/ d.width() * 100 ; //To add s.t. 0 for 0 votes is visible too
 
         offsetNumber =  $($bar.children()[1]).css("width"); //Absolute width of vote number with "px" postfix, .width() is somehow to small
         offsetNumber = offsetNumber.substring(0, offsetNumber.length - 2); // 90px -> "90"
