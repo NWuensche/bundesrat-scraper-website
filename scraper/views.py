@@ -223,7 +223,7 @@ def extractOpinionSenatsText(senatsText):
     text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt",
         "Nichtfassen der Entschließung" #BAY 981 14
         ], CONSTS.NO )
-    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "Absehen von einer Stellungnahme", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
+    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "Absehen von einer Stellungnahme", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen", "Absehen von Stellungnahme", "nicht abzustimmen", "es wird festgestellt, dass der Vermittlungsausschuss nicht angerufen wird" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
     text = replaceStringIfSomeMatchWith(text, 
             [   "keine einwendungen", 
                 "hat der Verordnung zugestimmt",
@@ -240,10 +240,19 @@ def extractOpinionSenatsText(senatsText):
                 "Zu den Gesetzen einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
                 "Die Einberufung des Vermittlungsausschusses wurde nicht verlangt",
                 "Dem Gesetz wurde einstimmig zugestimmt",
+                "Einstimmige Wahl",
+                "einstimmig vorschlagsgemäß",
+                "Stellungnahme gemäß", #Basically means "agreed to statement"
+                "Stellungnahme gem.", 
+                "Stellungnahme wie",
+                "Stellungnahme entsprechend",
+                "Wahl gemäß Vorschlag",
                 "einen Antrag auf Anrufung des Vermittlungsausschusses nicht zu stellen",
                 "zustimmung",
-                "zuzustimmen",
+                "zuzustimmen"
                 "zugestimmt",
+                "Fassen nach Maßgabe"
+                "Wahl von",
                 "Freie Hand", #Bremen 988 1a
                 "Fassen der Entschließung nach Maßgaben unterstützt",
                 "mit den Stimmen Hamburgs zugestimmt",
@@ -269,6 +278,8 @@ def extractOpinionSenatsText(senatsText):
                 "Stellungnahme des Bundesrates unterstützt",
                 "Stellungnahme des Bundesrates überwiegend unterstützt",
                 "Ein Antrag auf Anrufung des Vermittlungsausschusses lag nicht vor",
+                "Ein Antrag auf Anrufung des Vermittlungsausschusses liegt nicht vor", 
+                "Es lag kein Antrag auf Anrufung des Vermittlungsaus­schusses vor",
                 "Erteilen der Entlastung",
                 "Erteilung der Entlastung",
                 "Entlastung erteilen",
@@ -278,6 +289,7 @@ def extractOpinionSenatsText(senatsText):
                 "Die Landesregierung hat den Benennungsvorschlägen zugestimmt",
                 "Die Landesregierung hat der Verordnung nach Maßgaben zugestimmt",
                 "Zuleitung der Verordnung",
+                "Entsprechend den Anregungen und Vorschlägen zu beschließen",
                 "Dem Gesetz wurde zugestimmt", 
                 "Dem Gesetz zuzustimmen"
             ], CONSTS.YES )
