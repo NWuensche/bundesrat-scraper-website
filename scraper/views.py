@@ -223,7 +223,7 @@ def extractOpinionSenatsText(senatsText):
     text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt",
         "Nichtfassen der Entschließung" #BAY 981 14
         ], CONSTS.NO )
-    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
+    text = replaceStringIfSomeMatchWith(text, ["enthaltung", "Absehen von einer Stellungnahme", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
     text = replaceStringIfSomeMatchWith(text, 
             [   "keine einwendungen", 
                 "hat der Verordnung zugestimmt",
@@ -278,7 +278,7 @@ def extractOpinionSenatsText(senatsText):
                 "Die Landesregierung hat den Benennungsvorschlägen zugestimmt",
                 "Die Landesregierung hat der Verordnung nach Maßgaben zugestimmt",
                 "Zuleitung der Verordnung",
-                "Dem Gesetz wurde zugestimmt"
+                "Dem Gesetz wurde zugestimmt", 
                 "Dem Gesetz zuzustimmen"
             ], CONSTS.YES )
 
