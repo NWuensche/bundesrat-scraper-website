@@ -92,69 +92,20 @@ def getTopsAJAX(request):
 
     return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize response without content_type
 
-#If DB is empty, load JSONs from GitHub repo
-def initDBIfEmpty():
-    if not Json.objects.exists(): #Table empty -> Load JSONs
-        loadSessionJSONsInDB()
-
-    if not JsonCountyPDFLinks.objects.exists(): #Load PDF Link JSONs
-        loadJSONsPDFLinksInDB()
-
-# Store Scraped Session JSONs form GitHub Repo in DB
-def loadSessionJSONsInDB():
-    #Store all counties in DB
-    jsonSessionsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json" #Repo link to sessions JSONs
-    storeResponsesCountriesInDB(jsonSessionsUrl, Json)
-
-    #bundesrat folder with Session->TOPs mapping extra
-    #Minimally different, so own segment
-    brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
-    response = loadURL(brUrl)
-    storeJSONResponseAsRowInTable(Json, county="bundesrat", response)
-
-def loadJSONsPDFLinksInDB():
-    jsonPDFsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json" #Repo link to PDF Links JSONs
-    storeResponsesCountriesInDB(jsonPDFsUrl, JsonCountyPDFLinks)
-
-#Used to store PDF Link JSONs as well as Session JSONs
-#url with {} placeholder for county name
-def storeResponsesCountriesInDB(urlFormatString, TableName):
-    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
-        countyJsonUrl = urlFormatString.format(county)
-        response = loadURL(countyJsonUrl)
-        storeJSONResponseAsRowInTable(TableName, county, response)
-#Load request for given URL
-def loadURL(url):
-    response = requests.get(countyJsonUrl)
-    if response.status_code != 200:
-        raise Exception('{} not found'.format(countyJsonUrl))
-
-
-
-#Store given JSON from request as new table
-def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
-    json = jsonResponse.content.decode() #If one doesn't decode bytearray, there is a problem when storing (bytearray) string and rereading it later to json
-    rowTable = TableName(county=countyName, json=json) #Init new row
-    rowTable.save()
 
 # function for "/loadJSON" requests
+# Returns senats texts and number of opinions and meta data for given TOP of given session
 def loadJSON(request):
     initDBIfEmpty()
+
+    # Get reqeustion session number and TOP
     sessionNumber = int(request.GET["sessionNumber"])
     topNumber = request.GET["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
-    brRow = Json.objects.get(county="bundesrat")
-    brJSON = json.loads(brRow.json)
-    sessionURL = ""
-    allTOPs = []
-    for session in brJSON:
-        if int(session['number']) == sessionNumber:
-            sessionURL = session['url']
-            for top in session["tops"]:
-                if top["number"] == topNumber:
-                    topTitle = top['title']
-                    topCategory = top.get('law_category', 'Ohne Kategorie')#Zustimmungsbedürftig/Einspruchsgesetz/None
-                    topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
-            break
+
+    topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
+
+
+    # Count number of different opinitions 
     numYES = 0
     numNO = 0
     numABSTENTION = 0
@@ -194,6 +145,23 @@ def loadJSON(request):
     sessionNumbers = getSessionNumbers() #For Navbar on result site
 
     return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
+
+# Look up TOP title + category + tenor for given TOP
+def getMetaDataTOP(sessionNumer, top):
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    sessionURL = ""
+    allTOPs = []
+    for session in brJSON:
+        if int(session['number']) == sessionNumber: 
+            sessionURL = session['url']
+            for top in session["tops"]:
+                if top["number"] == topNumber:
+                    topTitle = top['title']
+                    topCategory = top.get('law_category', 'Ohne Kategorie')#Zustimmungsbedürftig/Einspruchsgesetz/None
+                    topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
+                    return topTitle, topCategory, topBeschlussTenor
+
 
 #In: some senats text
 #Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
@@ -332,9 +300,52 @@ def getPartitionSizesZustimmLaws():
                     numZustimmLawsYES += 1
                 elif tenor in ["Versagung der Zustimmung", "Anrufung des Vermittlungsausschusses", "Stellungnahme"]: #Stellungnahme from 948 1a, seems to be a NO
                     numZustimmLawsNO += 1
-                elif tenor in ["Fristeinrede; Absetzung von TO", "Absetzung von TO"]: 
+                elif tenor in ["Fristeinrede; Absetzung von TO", "Absetzung von TO"]:
                     numZustimmLawsTOPRemoval += 1
                 elif  tenor == "":
                     numZustimmLawsMISSING += 1
     return (numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING)
 
+#If DB is empty, load JSONs from GitHub repo
+def initDBIfEmpty():
+    if not Json.objects.exists(): #Table empty -> Load JSONs
+        loadSessionJSONsInDB()
+
+    if not JsonCountyPDFLinks.objects.exists(): #Load PDF Link JSONs
+        loadJSONsPDFLinksInDB()
+
+# Store Scraped Session JSONs form GitHub Repo in DB
+def loadSessionJSONsInDB():
+    #Store all counties in DB
+    jsonSessionsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json" #Repo link to sessions JSONs
+    storeResponsesCountriesInDB(jsonSessionsUrl, Json)
+
+    #bundesrat folder with Session->TOPs mapping extra
+    #Minimally different, so own segment
+    brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
+    response = loadURL(brUrl)
+    storeJSONResponseAsRowInTable(Json, county="bundesrat", response)
+
+def loadJSONsPDFLinksInDB():
+    jsonPDFsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json" #Repo link to PDF Links JSONs
+    storeResponsesCountriesInDB(jsonPDFsUrl, JsonCountyPDFLinks)
+
+#Used to store PDF Link JSONs as well as Session JSONs
+#url with {} placeholder for county name
+def storeResponsesCountriesInDB(urlFormatString, TableName):
+    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
+        countyJsonUrl = urlFormatString.format(county)
+        response = loadURL(countyJsonUrl)
+        storeJSONResponseAsRowInTable(TableName, county, response)
+
+#Load request for given URL
+def loadURL(url):
+    response = requests.get(countyJsonUrl)
+    if response.status_code != 200:
+        raise Exception('{} not found'.format(countyJsonUrl))
+
+#Store given JSON from request as new table
+def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
+    json = jsonResponse.content.decode() #If one doesn't decode bytearray, there is a problem when storing (bytearray) string and rereading it later to json
+    rowTable = TableName(county=countyName, json=json) #Init new row
+    rowTable.save()
