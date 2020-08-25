@@ -40,13 +40,6 @@ class CONSTS:
             "OTHER": "Nicht ermittelbar",
             }
 
-#If DB is empty, load JSONs from GitHub repo
-def initDBIfEmpty():
-    if not Json.objects.exists(): #Table empty -> Load JSONs
-        loadJSONsInDB()
-
-    if not JsonCountyPDFLinks.objects.exists(): #Load PDF Link JSONs
-        loadJSONsPDFLinksInDB()
 
 #Out: List of all SessionNumbers [992, 991,...,910]
 def getSessionNumbers():
@@ -55,7 +48,7 @@ def getSessionNumbers():
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
     return allSessionNumbers
 
-# function for "/" request
+# function for "/" requests
 # Output 1: all session numbers for the search field
 # Output 2: latest Session URL for main text
 def index(request):
@@ -68,7 +61,7 @@ def index(request):
 
     return render(request, "index.html", {"sessionNumbers": sessionNumbers, "urlLatestSession": URL_LATEST_SESSION.format(latestSessionNumber)})
 
-# function for "/metaStudies" request
+# function for "/metaStudies" requests
 # Returns all numbers for the 2 bar charts.
 def metaStudies(request):
     initDBIfEmpty()
@@ -81,7 +74,7 @@ def metaStudies(request):
 
     return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramSumLaws": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws, "numZustimmLawsYES": numZustimmLawsYES, "numZustimmLawsNO": numZustimmLawsNO, "numZustimmLawsTOPRemoval": numZustimmLawsTOPRemoval,  "numZustimmLawsMISSING": numZustimmLawsMISSING})
 
-# function for "/getTopsAJAX" AJAX call
+# function for "/getTopsAJAX" AJAX requests
 # Used when session in search changed
 def getTopsAJAX(request):
     initDBIfEmpty()
@@ -99,44 +92,52 @@ def getTopsAJAX(request):
 
     return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize response without content_type
 
-# Store Scraped Session JSONs form GitHub Repo in DB
-def loadJSONsInDB():
-    #Store all counties in DB
-    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json" #Repo link to 
-    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
-        countyJsonUrl = jsonUrl.format(county)
-        response = requests.get(countyJsonUrl)
+#If DB is empty, load JSONs from GitHub repo
+def initDBIfEmpty():
+    if not Json.objects.exists(): #Table empty -> Load JSONs
+        loadSessionJSONsInDB()
 
-        # Error if can't access JSON
-        if response.status_code != 200:
-            raise Exception('{} not found'.format(countyJsonUrl))
-        storeJSONResponseAsRowInTable(Json, county, response)
-    
+    if not JsonCountyPDFLinks.objects.exists(): #Load PDF Link JSONs
+        loadJSONsPDFLinksInDB()
+
+# Store Scraped Session JSONs form GitHub Repo in DB
+def loadSessionJSONsInDB():
+    #Store all counties in DB
+    jsonSessionsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json" #Repo link to sessions JSONs
+    storeResponsesCountriesInDB(jsonSessionsUrl, Json)
+
     #bundesrat folder with Session->TOPs mapping extra
     #Minimally different, so own segment
     brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
-    #TODO remove double code
-    response = requests.get(brUrl)
-    if response.status_code != 200:
-        raise Exception('{} not found'.format(brUrl))
+    response = loadURL(brUrl)
     storeJSONResponseAsRowInTable(Json, county="bundesrat", response)
 
-#TODO Merge with loadJSONsInDB, but no bundesrat folder used here
 def loadJSONsPDFLinksInDB():
-    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json"
-    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
-        countyJsonUrl = jsonUrl.format(county)
-        response = requests.get(countyJsonUrl)
-        if response.status_code != 200:
-            raise Exception('{} not found'.format(countyJsonUrl))
-        storeJSONResponseAsRowInTable(JsonCountyPDFLinks, county, response)
+    jsonPDFsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json" #Repo link to PDF Links JSONs
+    storeResponsesCountriesInDB(jsonPDFsUrl, JsonCountyPDFLinks)
 
+#Used to store PDF Link JSONs as well as Session JSONs
+#url with {} placeholder for county name
+def storeResponsesCountriesInDB(urlFormatString, TableName):
+    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
+        countyJsonUrl = urlFormatString.format(county)
+        response = loadURL(countyJsonUrl)
+        storeJSONResponseAsRowInTable(TableName, county, response)
+#Load request for given URL
+def loadURL(url):
+    response = requests.get(countyJsonUrl)
+    if response.status_code != 200:
+        raise Exception('{} not found'.format(countyJsonUrl))
+
+
+
+#Store given JSON from request as new table
 def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
-    json = jsonResponse.content.decode() #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
+    json = jsonResponse.content.decode() #If one doesn't decode bytearray, there is a problem when storing (bytearray) string and rereading it later to json
     rowTable = TableName(county=countyName, json=json) #Init new row
     rowTable.save()
 
-
+# function for "/loadJSON" requests
 def loadJSON(request):
     initDBIfEmpty()
     sessionNumber = int(request.GET["sessionNumber"])
