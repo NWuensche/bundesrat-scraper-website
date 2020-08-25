@@ -104,45 +104,10 @@ def loadJSON(request):
 
     topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
 
-
-    # Count number of different opinitions 
-    numYES = 0
-    numNO = 0
-    numABSTENTION = 0
-    numOTHER = 0
-    countySenatTextAndOpinionAndPDFLink = {}
-    allRows = Json.objects.all()
-    for row in allRows:
-        if row.county == "bundesrat": #TODO besser
-            continue #already processed
-        countyDBName = row.county
-        countyRealName=CONSTS.COUNTY_DISPLAY_NAME[row.county]
-        countyJSON = json.loads(row.json)
-        countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
-        countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {"senat": "Abstimmungsverhalten nicht öffentlich einsehbar"}) #To keep flow, add "No Text" string as dict (NO PDF - Case)
-        NOTHING_FOUND = "Keine Aussage zum Abstimmungsverhalten im entsprechenden Dokument gefunden"
-        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", NOTHING_FOUND) #PDF there, but nothing for TOP found - Case
-        countySessionTOPSenatsText = countySessionTOPSenatsText if (countySessionTOPSenatsText.strip() != "")  else NOTHING_FOUND
-        opinion = extractOpinionSenatsText(countySessionTOPSenatsText)
-
-        # Counter for diagram
-        if opinion == CONSTS.YES:
-            numYES += 1
-        elif opinion == CONSTS.NO:
-            numNO += 1
-        elif opinion == CONSTS.ABSTENTION:
-            numABSTENTION += 1
-        else: #No PDF or no Text in JSON or can't match string
-            numOTHER += 1
-        opinionDisplayName = CONSTS.OPINION_DISPLAY_NAME.get(opinion, CONSTS.OPINION_DISPLAY_NAME["OTHER"])
-
-        pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyDBName)
-        pdfLinksAbstimmungsverhaltenJSON = json.loads(pdfLinksAbstimmungsverhaltenRow.json)
-        pdfLinkCountyCurrentSession = pdfLinksAbstimmungsverhaltenJSON.get(str(sessionNumber), "") #No pdf for county and session ? -> empty link
-
-        countySenatTextAndOpinionAndPDFLink[countyRealName] = (countySessionTOPSenatsText, opinionDisplayName, pdfLinkCountyCurrentSession)
-
-    sessionNumbers = getSessionNumbers() #For Navbar on result site
+    countySenatTextAndOpinionAndPDFLink = getCountyDataSenatsTexts()
+    # Count number of different opinions 
+    opinions = [opinion for (_, opinion, _) for countySenatTextAndOpinionAndPDFLink.values()] #exctract opinion from map
+    numYES, numNO, numABSTENTION, numOTHER = countSizeParitionsOpinions(opinions)
 
     return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
 
@@ -162,6 +127,57 @@ def getMetaDataTOP(sessionNumer, top):
                     topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
                     return topTitle, topCategory, topBeschlussTenor
 
+#Returns Map with key country name and value triple (senat_text, opinion, 
+def getCountiesSenatsTextsData():
+    countySenatTextAndOpinionAndPDFLink = {}
+    allRows = Json.objects.all()
+    for row in allRows:
+        if row.county == "bundesrat": #bundesrat is no county, skip
+            continue 
+
+        # Get Senats Text of given county for given session and top, fallbacks if not present
+        countyDBName = row.county
+        countyRealName=CONSTS.COUNTY_DISPLAY_NAME[row.county]
+        countyJSON = json.loads(row.json)
+        countySessionTextsJSON = countyJSON.get(str(sessionNumber), {}) #{} is default, but doesn't like keyword "default"
+        countySessionTOPTextsJSON = countySessionTextsJSON.get(str(topNumber), {"senat": "Abstimmungsverhalten nicht öffentlich einsehbar"}) #To keep flow, add "No Text" string as dict (NO PDF - Case)
+        NOTHING_FOUND = "Keine Aussage zum Abstimmungsverhalten im entsprechenden Dokument gefunden"
+        countySessionTOPSenatsText = countySessionTOPTextsJSON.get("senat", NOTHING_FOUND) #PDF there, but nothing for TOP found - Case
+        countySessionTOPSenatsText = countySessionTOPSenatsText if (countySessionTOPSenatsText.strip() != "")  else NOTHING_FOUND #Different case with same results
+
+        #get opinion from senats text
+        opinion = extractOpinionSenatsText(countySessionTOPSenatsText)
+        opinionDisplayName = CONSTS.OPINION_DISPLAY_NAME.get(opinion, CONSTS.OPINION_DISPLAY_NAME["OTHER"])
+
+        #get Link to PDF source with this senats text
+        pdfLinksAbstimmungsverhaltenRow = JsonCountyPDFLinks.objects.get(county=countyDBName)
+        pdfLinksAbstimmungsverhaltenJSON = json.loads(pdfLinksAbstimmungsverhaltenRow.json)
+        pdfLinkCountyCurrentSession = pdfLinksAbstimmungsverhaltenJSON.get(str(sessionNumber), "") #No pdf for county and session ? -> empty link
+
+        # Add triple
+        countySenatTextAndOpinionAndPDFLink[countyRealName] = (countySessionTOPSenatsText, opinionDisplayName, pdfLinkCountyCurrentSession)
+
+    return  countySenatTextAndOpinionAndPDFLink
+
+#Returns 4-tuple of the number of the four different results for counties opinion for bar chart
+#In: List of opinions of counties
+def countSizeParitionsOpinions(opinions):
+    # Count number of different opinions 
+    numYES = 0
+    numNO = 0
+    numABSTENTION = 0
+    numOTHER = 0
+    for opinion in opinions:
+        # Counter for bar charts
+        if opinion == CONSTS.YES:
+            numYES += 1
+        elif opinion == CONSTS.NO:
+            numNO += 1
+        elif opinion == CONSTS.ABSTENTION:
+            numABSTENTION += 1
+        else: #No PDF or no Text in JSON or can't match string
+            numOTHER += 1
+    return numYES, numNO, numABSTENTION, numOTHER
 
 #In: some senats text
 #Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
