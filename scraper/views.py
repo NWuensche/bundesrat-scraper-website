@@ -7,10 +7,13 @@ import requests #Load JSONs if necessary
 import json #Str -> JSON,
 import re #For senats text replacement
 
-class CONSTS: #Can't use "global" vars else
+#Constant values which are used by the methods
+#Can't use "global" variables, because they cannot be accessed
+class CONSTS: 
     YES="YES"
     NO="NO"
     ABSTENTION="ABSTENTION"
+    #mapping from json county name to actual displayed county name
     COUNTY_DISPLAY_NAME = {
             "baden_wuerttemberg": "Baden-Württemberg",
             "bayern": "Bayern",
@@ -29,6 +32,7 @@ class CONSTS: #Can't use "global" vars else
             "schleswig_holstein": "Schleswig-Holstein",
             "thueringen": "Thüringen",
             }
+    #mapping from internal opinion string to actual displayed opinion
     OPINION_DISPLAY_NAME = {
             "YES": "Zustimmung",
             "NO": "Ablehnung",
@@ -36,12 +40,12 @@ class CONSTS: #Can't use "global" vars else
             "OTHER": "Nicht ermittelbar",
             }
 
-#If DB is empty, load stuff
+#If DB is empty, load JSONs from GitHub repo
 def initDBIfEmpty():
     if not Json.objects.exists(): #Table empty -> Load JSONs
         loadJSONsInDB()
 
-    if not JsonCountyPDFLinks.objects.exists(): #Load 
+    if not JsonCountyPDFLinks.objects.exists(): #Load PDF Link JSONs
         loadJSONsPDFLinksInDB()
 
 #Out: List of all SessionNumbers [992, 991,...,910]
@@ -51,32 +55,40 @@ def getSessionNumbers():
     allSessionNumbers = list(map(lambda session: session["number"], brJSON))
     return allSessionNumbers
 
+# function for "/" request
+# Output 1: all session numbers for the search field
+# Output 2: latest Session URL for main text
 def index(request):
     initDBIfEmpty()
 
     sessionNumbers = getSessionNumbers()
+    latestSessionNumber = max(sessionNumbers)
 
     URL_LATEST_SESSION="https://www.bundesrat.de/SharedDocs/TO/{}/to-node.html"
-    latestSessionNumber = max(sessionNumbers)
 
     return render(request, "index.html", {"sessionNumbers": sessionNumbers, "urlLatestSession": URL_LATEST_SESSION.format(latestSessionNumber)})
 
+# function for "/metaStudies" request
+# Returns all numbers for the 2 bar charts.
 def metaStudies(request):
     initDBIfEmpty()
-    numZustimmLaws, numEntscheidungsLaws = getNumberLaws()
+    numZustimmLaws, numEntscheidungsLaws = getNumberOfLaws()
     numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING = getPartitionSizesZustimmLaws()
     sessionNumbers = getSessionNumbers() #For Navbar on result site
-
-    #Need them to show where Meta-Study applies to
+    #Need min/max session numbers to show user for which session the Meta-Study applies to
     minSessionNumber = min(sessionNumbers)
     maxSessionNumber = max(sessionNumbers)
 
     return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramSumLaws": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws, "numZustimmLawsYES": numZustimmLawsYES, "numZustimmLawsNO": numZustimmLawsNO, "numZustimmLawsTOPRemoval": numZustimmLawsTOPRemoval,  "numZustimmLawsMISSING": numZustimmLawsMISSING})
 
+# function for "/getTopsAJAX" AJAX call
+# Used when session in search changed
 def getTopsAJAX(request):
     initDBIfEmpty()
 
-    sessionNumber = int(request.GET['sNumber'])
+    sessionNumber = int(request.GET['sNumber']) #Currently selected session in search
+
+    # Get TOPs for given session
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     for session in brJSON:
@@ -84,76 +96,46 @@ def getTopsAJAX(request):
             allTOPs = list(map(lambda top: {'name': top["number"]}, session["tops"]))
             allTOPs.reverse() #TOP 1 at the start afterwards
             break
-    return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize without content_type
 
+    return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize response without content_type
+
+# Store Scraped Session JSONs form GitHub Repo in DB
 def loadJSONsInDB():
-    counties = [
-            "baden_wuerttemberg",
-            "bayern",
-            "berlin",
-            "brandenburg", 
-            "bremen",
-            "hamburg",
-            "hessen",
-            "mecklenburg_vorpommern",
-            "niedersachsen",
-            "nordrhein_westfalen",
-            "rheinland_pfalz",
-            "saarland",
-            "sachsen",
-            "sachsen_anhalt",
-            "schleswig_holstein",
-            "thueringen",
-            ]
-    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json"
-    for county in counties:
+    #Store all counties in DB
+    jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_tops.json" #Repo link to 
+    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
         countyJsonUrl = jsonUrl.format(county)
         response = requests.get(countyJsonUrl)
+
+        # Error if can't access JSON
         if response.status_code != 200:
             raise Exception('{} not found'.format(countyJsonUrl))
-        #TODO rename county attribute
-        countyDBRow = Json(county = county, json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
-        countyDBRow.save()
+        storeJSONResponseAsRowInTable(Json, county, response)
     
     #bundesrat folder with Session->TOPs mapping extra
+    #Minimally different, so own segment
     brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
     #TODO remove double code
     response = requests.get(brUrl)
     if response.status_code != 200:
         raise Exception('{} not found'.format(brUrl))
-    #TODO rename county attribute
-    brDBRow = Json(county = "bundesrat", json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
-    brDBRow.save()
+    storeJSONResponseAsRowInTable(Json, county="bundesrat", response)
 
 #TODO Merge with loadJSONsInDB, but no bundesrat folder used here
 def loadJSONsPDFLinksInDB():
-    counties = [
-            "baden_wuerttemberg",
-            "bayern",
-            "berlin",
-            "brandenburg", 
-            "bremen",
-            "hamburg",
-            "hessen",
-            "mecklenburg_vorpommern",
-            "niedersachsen",
-            "nordrhein_westfalen",
-            "rheinland_pfalz",
-            "saarland",
-            "sachsen",
-            "sachsen_anhalt",
-            "schleswig_holstein",
-            "thueringen",
-            ]
     jsonUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json"
-    for county in counties:
+    for county in CONSTS.COUNTY_DISPLAY_NAME.keys(): #loop over all county names
         countyJsonUrl = jsonUrl.format(county)
         response = requests.get(countyJsonUrl)
         if response.status_code != 200:
             raise Exception('{} not found'.format(countyJsonUrl))
-        #TODO rename county attribute
-        countyDBRow = JsonCountyPDFLinks(county = county, json = response.content.decode()) #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
-        countyDBRow.save()
+        storeJSONResponseAsRowInTable(JsonCountyPDFLinks, county, response)
+
+def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
+    json = jsonResponse.content.decode() #If not decode bytearraw, then problem when storing (bytearray) string and rereading it to json
+    rowTable = TableName(county=countyName, json=json) #Init new row
+    rowTable.save()
+
 
 def loadJSON(request):
     initDBIfEmpty()
@@ -299,7 +281,7 @@ def extractOpinionSenatsText(senatsText):
 #In: String to match against (Will all be lower cased in the end)
 #In: List of strings/words to match
 #In: Replacement string if some match in string
-#Out: replacement if match, else original
+#Out: replacement if at least one match, else original
 def replaceStringIfSomeMatchWith(inString, toMatchList, replacement):
 
     toMatchListLC = map(str.lower, toMatchList)
@@ -313,7 +295,7 @@ def replaceStringIfSomeMatchWith(inString, toMatchList, replacement):
     return inString #Nothing Found, so return original string
 
 #Returns tuple of number of "Zustimmungsbedürfige Gesetze" and "Entscheidungsgesetz" across sessions 910-992
-def getNumberLaws():
+def getNumberOfLaws():
     initDBIfEmpty()
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
@@ -329,7 +311,7 @@ def getNumberLaws():
                 numEntscheidungsLaws += 1
     return (numZustimmLaws, numEntscheidungsLaws)
 
-#Returns 4-tuple of size of Results of Zustimmungsbedürftige Gesetze
+#Returns 4-tuple of the number of the four different results for Zustimmungsbedürftige Gesetze in the BR
 def getPartitionSizesZustimmLaws():
     initDBIfEmpty()
     brRow = Json.objects.get(county="bundesrat")
@@ -339,6 +321,7 @@ def getPartitionSizesZustimmLaws():
     numZustimmLawsNO = 0
     numZustimmLawsTOPRemoval = 0 #Not Discussed
     numZustimmLawsMISSING = 0 #No Tenor e.g. 989 2
+    #If special string found, increment right number by one
     for session in brJSON:
         for top in session["tops"]:
             topCategory = top.get("law_category", "")
