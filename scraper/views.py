@@ -100,19 +100,20 @@ def loadJSON(request):
 
     # Get reqeustion session number and TOP
     sessionNumber = int(request.GET["sessionNumber"])
-    topNumber = request.GET["topNumber"] #TODO Is Subpart + Number , should rename JS Parameter
+    topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
 
-    topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
+    sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
 
-    countySenatTextAndOpinionAndPDFLink = getCountyDataSenatsTexts()
+    countySenatTextAndOpinionAndPDFLink = getCountiesSenatsTextsData(sessionNumber, topNumber)
     # Count number of different opinions 
-    opinions = [opinion for (_, opinion, _) for countySenatTextAndOpinionAndPDFLink.values()] #exctract opinion from map
+    opinions = [opinion for (_, opinion, _) in countySenatTextAndOpinionAndPDFLink.values()] #exctract opinion from map
     numYES, numNO, numABSTENTION, numOTHER = countSizeParitionsOpinions(opinions)
+    sessionNumbers = getSessionNumbers()
 
     return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
 
 # Look up TOP title + category + tenor for given TOP
-def getMetaDataTOP(sessionNumer, top):
+def getMetaDataTOP(sessionNumber, topNumber):
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     sessionURL = ""
@@ -125,10 +126,10 @@ def getMetaDataTOP(sessionNumer, top):
                     topTitle = top['title']
                     topCategory = top.get('law_category', 'Ohne Kategorie')#Zustimmungsbedürftig/Einspruchsgesetz/None
                     topBeschlussTenor = top.get('beschlusstenor', 'Kein Beschlusstenor') #Zustimmung/Versagung der Zustimmung/keine Einberufung des Vermittlungsausschusses/...
-                    return topTitle, topCategory, topBeschlussTenor
+                    return sessionURL, topTitle, topCategory, topBeschlussTenor
 
 #Returns Map with key country name and value triple (senat_text, opinion, 
-def getCountiesSenatsTextsData():
+def getCountiesSenatsTextsData(sessionNumber, topNumber):
     countySenatTextAndOpinionAndPDFLink = {}
     allRows = Json.objects.all()
     for row in allRows:
@@ -340,7 +341,7 @@ def loadSessionJSONsInDB():
     #Minimally different, so own segment
     brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
     response = loadURL(brUrl)
-    storeJSONResponseAsRowInTable(Json, county="bundesrat", response)
+    storeJSONResponseAsRowInTable(Json, county="bundesrat", jsonResponse = response)
 
 def loadJSONsPDFLinksInDB():
     jsonPDFsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json" #Repo link to PDF Links JSONs
