@@ -341,7 +341,7 @@ def loadSessionJSONsInDB():
     #Minimally different, so own segment
     brUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/bundesrat/sessions.json"
     response = loadURL(brUrl)
-    storeJSONResponseAsRowInTable(Json, county="bundesrat", jsonResponse = response)
+    storeJSONResponseAsRowInTable(Json, countyName="bundesrat", jsonResponse = response)
 
 def loadJSONsPDFLinksInDB():
     jsonPDFsUrl = "https://raw.githubusercontent.com/okfde/bundesrat-scraper/master/{}/session_urls.json" #Repo link to PDF Links JSONs
@@ -357,9 +357,10 @@ def storeResponsesCountriesInDB(urlFormatString, TableName):
 
 #Load request for given URL
 def loadURL(url):
-    response = requests.get(countyJsonUrl)
+    response = requests.get(url)
     if response.status_code != 200:
-        raise Exception('{} not found'.format(countyJsonUrl))
+        raise Exception('{} not found'.format(url))
+    return response
 
 #Store given JSON from request as new table
 def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
