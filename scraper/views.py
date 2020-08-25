@@ -161,7 +161,7 @@ def getCountiesSenatsTextsData(sessionNumber, topNumber):
     return  countySenatTextAndOpinionAndPDFLink
 
 #Returns 4-tuple of the number of the four different results for counties opinion for bar chart
-#In: List of opinions of counties
+#In: List of display strings opinions of counties
 def countSizeParitionsOpinions(opinions):
     # Count number of different opinions 
     numYES = 0
@@ -170,11 +170,11 @@ def countSizeParitionsOpinions(opinions):
     numOTHER = 0
     for opinion in opinions:
         # Counter for bar charts
-        if opinion == CONSTS.YES:
+        if opinion == CONSTS.OPINION_DISPLAY_NAME["YES"]:
             numYES += 1
-        elif opinion == CONSTS.NO:
+        elif opinion == CONSTS.OPINION_DISPLAY_NAME["NO"]:
             numNO += 1
-        elif opinion == CONSTS.ABSTENTION:
+        elif opinion == CONSTS.OPINION_DISPLAY_NAME["ABSTENTION"]:
             numABSTENTION += 1
         else: #No PDF or no Text in JSON or can't match string
             numOTHER += 1
