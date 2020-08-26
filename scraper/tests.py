@@ -84,7 +84,6 @@ class Tests(TestCase):
         self.assertTrue('<div class="bar other" data-value="0"' in searchHTML) #0 texts couldn't be parsed
 
     def testSearchResultSuccess2(self):
-        #TODO Test Search Bar
         request = self.factory.get("/loadJSON?sessionNumber=973&topNumber=25b") #Session 973, TOP 25a is a TOP with all four bars present
         request.user = AnonymousUser()
 
@@ -112,3 +111,17 @@ class Tests(TestCase):
         self.assertTrue('<div class="bar no" data-value="2"' in searchHTML) #2 counties voted with NO
         self.assertTrue('<div class="bar abstention" data-value="4"' in searchHTML) #4 counties voted with ABSTENTION
         self.assertTrue('<div class="bar other" data-value="6"' in searchHTML) #6 texts couldn't be parsed
+
+    def testSearchResultBothPresentSessionExistsTOPDoesNot(self):
+        request = self.factory.get("/loadJSON?sessionNumber=973&topNumber=1337")
+        request.user = AnonymousUser()
+
+        # Test my_view() as if it were deployed at /customer/details
+        response = loadJSON(request)
+        self.assertEqual(response.status_code, 404)
+
+        searchHTML = response.content.decode()
+        #TODO Check das Search Bar wieder auf 992
+
+#TODO Test AJAX
+#TODO Check GET Parameter AJAX

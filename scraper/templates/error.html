@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+{% include 'searchTOP.html' %}
+
+<div class="container">
+  <p class="lead" >
+   Für die Sitzung {{currentSessionNumber}} existiert kein Tagesordnungspunkt {{top}}.
+
+</p>
+
+</div>
+
+
+
+{% endblock %}

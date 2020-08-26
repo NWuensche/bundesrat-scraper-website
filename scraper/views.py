@@ -99,8 +99,12 @@ def loadJSON(request):
     initDBIfEmpty()
 
     # Get reqeustion session number and TOP
+    #TODO Still Error if parameters not present
     sessionNumber = int(request.GET["sessionNumber"])
     topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
+    if not validTOP(sessionNumber, topNumber):
+        sessionNumbers = getSessionNumbers()
+        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "top": topNumber}, status=404)
 
     sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
 
@@ -111,6 +115,31 @@ def loadJSON(request):
     sessionNumbers = getSessionNumbers()
 
     return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
+
+#Takes session number and TOP
+#Returns if this session contains the TOP
+#If malformed parameters(from GET Parameters), also return false
+def validTOP(sessionNumber, topNumber):
+    if isinstance(sessionNumber, int): #Convert back to string for Dict Key later
+        sessionNumber = str(sessionNumber)
+    if isinstance(topNumber, int): #Convert back to string, not needed for subpart TOPs
+        topNumber = str(topNumber)
+    if not isinstance(sessionNumber, str) or not isinstance(topNumber, str): #Something has wrong type and is therefore malformed
+        return False
+
+    if not sessionNumber.isdigit(): #returns true only for strings that represent integers >= 0
+        return False #Not a non-negative integer
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    for session in brJSON:
+        if str(session["number"]) == sessionNumber:
+            for top in session.get("tops", []): #Default is empty list
+                if str(top["number"]) == topNumber: #Sometimes int for number TOPs
+                    return True
+    return False #Nothing found in JSON -> Not present
+
+
+
 
 # Look up TOP title + category + tenor for given TOP
 def getMetaDataTOP(sessionNumber, topNumber):
