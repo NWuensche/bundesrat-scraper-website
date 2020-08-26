@@ -7,6 +7,20 @@ import json
 
 
 class Tests(TestCase):
+
+    #Init DB only once, not for every test again
+    @classmethod
+    def setUpClass(cls):
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.user = AnonymousUser()
+        response = index(request)
+
+    #Needed because I have setUpClass, else error
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def setUp(self):
         # Every test needs access to the request factory.
         self.factory = RequestFactory()
@@ -46,7 +60,6 @@ class Tests(TestCase):
         self.assertTrue("Suchen Sie hier nach dem konkreten Abstimmungsverhalten jedes Bundeslandes im Bundesrat" in indexHTML)
         self.assertTrue('<a href="https://www.bundesrat.de/SharedDocs/TO/{}/to-node.html">hier</a>'.format(self.currentSession) in indexHTML) #Check right link to latest session
 
-    #TODO Nur einmal DB Init
     def testSearchResultSuccess(self):
         #TODO Test Search Bar
         request = self.factory.get("/loadJSON?sessionNumber=992&topNumber=4") #Session 992, TOP 4 is latest TOP with 3 bars none zero and 1 bar zero
@@ -76,3 +89,4 @@ class Tests(TestCase):
         self.assertTrue('<div class="bar other" data-value="0"' in searchHTML) #0 texts couldn't be parsed
 
 
+#TODO Noch ein success für session 973
