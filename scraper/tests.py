@@ -83,5 +83,32 @@ class Tests(TestCase):
         self.assertTrue('<div class="bar abstention" data-value="10"' in searchHTML) #10 counties voted with ABSTENTION
         self.assertTrue('<div class="bar other" data-value="0"' in searchHTML) #0 texts couldn't be parsed
 
+    def testSearchResultSuccess2(self):
+        #TODO Test Search Bar
+        request = self.factory.get("/loadJSON?sessionNumber=973&topNumber=25b") #Session 973, TOP 25a is a TOP with all four bars present
+        request.user = AnonymousUser()
 
-#TODO Noch ein success für session 973
+        # Test my_view() as if it were deployed at /customer/details
+        response = loadJSON(request)
+        self.assertEqual(response.status_code, 200)
+
+        searchHTML = response.content.decode()
+
+        self.assertTrue('<option value="973" selected>Sitzung 973</option>' in searchHTML) #Check 992 as session selected in search bar
+
+        #Test meta data present and correct
+        self.assertTrue("TOP 973/25b" in searchHTML)
+        self.assertTrue("Titel: 575/18 Entwurf eines Dreizehnten Gesetzes zur Änderung des Bundes-Immissionsschutzgesetzes" in searchHTML)
+        self.assertTrue("Kategorie: Ohne Kategorie" in searchHTML)
+        self.assertTrue("Beschlusstenor im Bundesrat: Stellungnahme" in searchHTML)
+
+        #Check some links and texts in table
+        self.assertTrue('<a href="https://staatskanzlei.hessen.de/sites/default/files/media/abstimmungsverhalten_hessens_in_der_973._sitzung_des_bundesrates.pdf">Hessen</a>' in searchHTML) #Check link to PDF present
+        self.assertTrue('Keine Einwendungen gemäß Ausschussempfehlung in Drucksache 575/1/18 Buchst. B Nr. 17.' in searchHTML) #Check Text present
+        self.assertTrue('<th>Zustimmung</th>' in searchHTML) #Check opinion parsed correctly
+
+        #Check Diagram
+        self.assertTrue('<div class="bar yes" data-value="4"' in searchHTML) #4 counties voted with YES, style floating points change randomly
+        self.assertTrue('<div class="bar no" data-value="2"' in searchHTML) #2 counties voted with NO
+        self.assertTrue('<div class="bar abstention" data-value="4"' in searchHTML) #4 counties voted with ABSTENTION
+        self.assertTrue('<div class="bar other" data-value="6"' in searchHTML) #6 texts couldn't be parsed
