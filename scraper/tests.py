@@ -27,13 +27,6 @@ class Tests(TestCase):
         self.currentSession = 992 #Last BR Session Number, needed for many tests
 
     def test_DB_setup(self):
-        # Create an instance of a GET request.
-        request = self.factory.get("/")
-        request.user = AnonymousUser()
-
-        # Test my_view() as if it were deployed at /customer/details
-        response = index(request)
-
         # Check DB Tables
         self.assertEqual(Json.objects.all().count(), 16+1) #16 rows for counties, 1 for bundesrat
         self.assertEqual(JsonCountyPDFLinks.objects.all().count(), 16) 
