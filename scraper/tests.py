@@ -64,6 +64,8 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
 
+        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar
+
         #Test meta data present and correct
         self.assertTrue("TOP 992/4" in searchHTML)
         self.assertTrue("Titel: 320/20 Gesetz zur Verbesserung der Hilfen für Familien bei Adoption (Adoptionshilfe-Gesetz)" in searchHTML)
