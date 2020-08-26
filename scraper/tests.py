@@ -49,7 +49,7 @@ class Tests(TestCase):
     #TODO Nur einmal DB Init
     def testSearchResultSuccess(self):
         #TODO Test Search Bar
-        request = self.factory.get("/loadJSON?sessionNumber=992&topNumber=4") #Latest TOP with 3 bars none zero and 1 bar empty
+        request = self.factory.get("/loadJSON?sessionNumber=992&topNumber=4") #Session 992, TOP 4 is latest TOP with 3 bars none zero and 1 bar zero
         request.user = AnonymousUser()
 
         # Test my_view() as if it were deployed at /customer/details
@@ -64,9 +64,15 @@ class Tests(TestCase):
         self.assertTrue("Kategorie: Zustimmungsbedürftiges Gesetz" in searchHTML)
         self.assertTrue("Beschlusstenor im Bundesrat: Versagung der Zustimmung" in searchHTML)
 
-        #Check some links and texts
+        #Check some links and texts in table
         self.assertTrue('<a href="https://landesvertretung-brandenburg.de/wp-content/uploads/992_Abstimmungverhalten-BB.pdf">Brandenburg</a>' in searchHTML) #Check link to PDF present
         self.assertTrue('Haltung SL: Enthaltung zum Anrufungsgrund und Zustimmung zum Gesetz' in searchHTML) #Check Text present
         self.assertTrue('<th>Ablehnung</th>' in searchHTML) #Check opinion parsed correctly
+
+        #Check Diagram
+        self.assertTrue('<div class="bar yes" data-value="3"' in searchHTML) #3 counties voted with YES, style floating points change randomly
+        self.assertTrue('<div class="bar no" data-value="3"' in searchHTML) #3 counties voted with NO
+        self.assertTrue('<div class="bar abstention" data-value="10"' in searchHTML) #10 counties voted with ABSTENTION
+        self.assertTrue('<div class="bar other" data-value="0"' in searchHTML) #0 texts couldn't be parsed
 
 
