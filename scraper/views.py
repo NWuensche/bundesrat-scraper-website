@@ -80,13 +80,19 @@ def getTopsAJAX(request):
     initDBIfEmpty()
 
     #TODO Error if not int
-    sessionNumber = int(request.GET['sNumber']) #Currently selected session in search
+    try:
+        sessionNumber = request.GET["sNumber"] # TODO Rename to sessionNumber like `loadJSON` Parameter
+    except:
+        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty. AJAX call, so no error message
+
+    if not isValidSessionNumber(sessionNumber):
+        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty, AJAX call, so no error message
 
     # Get TOPs for given session
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     for session in brJSON:
-        if int(session['number']) == sessionNumber:
+        if int(session['number']) == int(sessionNumber):
             allTOPs = list(map(lambda top: {'name': top["number"]}, session["tops"]))
             allTOPs.reverse() #TOP 1 at the start afterwards
             break
@@ -110,7 +116,7 @@ def loadJSON(request):
         topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
     except:
         return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingTOPNumber": True}, status=404) #Havent valiaded session number by now, so I shouldn't give it to html file
-    if not validTOP(sessionNumber, topNumber):
+    if not isValidTOP(sessionNumber, topNumber):
         return render(request, "error.html", {"sessionNumbers": sessionNumbers, "inputSessionNumber": sessionNumber, "inputTOP": topNumber}, status=404) #session number and top could be malformed, so don't give them names currentSessionNumber/currentTOP as this can damage search bar with its parameters
 
     sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
@@ -124,9 +130,31 @@ def loadJSON(request):
     return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": int(sessionNumber), "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER}) #If currentSessionNumber not int, then search bar gets reset to session 992 
 
 #Takes session number and TOP
-#Returns if this session contains the TOP
+#Returns True if this session is present
+#If malformed parameter(from GET Parameters), also return False
+def isValidSessionNumber(sessionNumber):
+    #Syntax Check
+    if isinstance(sessionNumber, int): #Convert back to string for Dict Key later
+        sessionNumber = str(sessionNumber)
+    if not isinstance(sessionNumber, str): #Something has wrong type and is therefore malformed
+        return False
+    if not sessionNumber.isdigit(): #returns true only for strings that represent integers >= 0
+        return False #Not a non-negative integer
+
+    #Semantic Check, is sessionnumber present?
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    for session in brJSON:
+        if str(session["number"]) == sessionNumber:
+            return True
+    return False #Nothing found in JSON -> Not present
+
+#Takes session number and TOP
+#Returns True if this session contains the TOP
 #If malformed parameters(from GET Parameters), also return false
-def validTOP(sessionNumber, topNumber):
+#Don't use isValidSessionNumber() because this would do 2 separate DB calls for isValidSessionNumber() and this function here
+def isValidTOP(sessionNumber, topNumber):
+    #Syntax Check
     if isinstance(sessionNumber, int): #Convert back to string for Dict Key later
         sessionNumber = str(sessionNumber)
     if isinstance(topNumber, int): #Convert back to string, not needed for subpart TOPs
@@ -136,6 +164,8 @@ def validTOP(sessionNumber, topNumber):
 
     if not sessionNumber.isdigit(): #returns true only for strings that represent integers >= 0
         return False #Not a non-negative integer
+
+    #Semantic Check, is TOP present?
     brRow = Json.objects.get(county="bundesrat")
     brJSON = json.loads(brRow.json)
     for session in brJSON:
@@ -144,9 +174,6 @@ def validTOP(sessionNumber, topNumber):
                 if str(top["number"]) == topNumber: #Sometimes int for number TOPs
                     return True
     return False #Nothing found in JSON -> Not present
-
-
-
 
 # Look up TOP title + category + tenor for given TOP
 def getMetaDataTOP(sessionNumber, topNumber):

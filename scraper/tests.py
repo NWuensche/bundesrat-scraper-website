@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 
-from .views import index,loadJSON,metaStudies #Needs __init__.py in same folder, else error when executing tests
+from .views import index,loadJSON,metaStudies, getTopsAJAX #Needs __init__.py in same folder, else error when executing tests
 from .models import Json, JsonCountyPDFLinks
 import json
 
@@ -175,7 +175,7 @@ class Tests(TestCase):
         self.assertTrue('Für die Sitzung "990" existiert kein Tagesordnungspunkt "a". Bitte suchen Sie erneut.' in searchHTML)
         self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
 
-    def testSearchResultBothPresentSessionToLow(self):
+    def testSearchResultBothPresentSessionTooLow(self):
         request = self.factory.get("/loadJSON?sessionNumber=909&topNumber=1")
         request.user = AnonymousUser()
 
@@ -210,6 +210,49 @@ class Tests(TestCase):
         self.assertTrue('<div class="bar abstention" data-value="8"' in metaHTML) #8 abstained
         self.assertTrue('<div class="bar other" data-value="10"' in metaHTML) #10 No Result published
 
+    def testgetTOPSAJAXSSuccess(self):
+        request = self.factory.get("/getTopsAJAX/?sNumber=992")
+        request.user = AnonymousUser()
 
-#TODO Test AJAX
-#TODO Check GET Parameter AJAX
+        response = getTopsAJAX(request)
+        self.assertEqual(response.status_code, 200)
+        topHTML = response.content.decode()
+
+        self.assertTrue(topHTML == '[{"name": "999e"}, {"name": "999d"}, {"name": "999c"}, {"name": "999b"}, {"name": "999a"}, {"name": "88"}, {"name": "87b"}, {"name": "87a"}, {"name": "86"}, {"name": "85"}, {"name": "84"}, {"name": "83"}, {"name": "82"}, {"name": "81"}, {"name": "80"}, {"name": "79"}, {"name": "78"}, {"name": "77"}, {"name": "76"}, {"name": "75b"}, {"name": "75a"}, {"name": "74"}, {"name": "73"}, {"name": "72"}, {"name": "71"}, {"name": "70b"}, {"name": "70a"}, {"name": "69d"}, {"name": "69c"}, {"name": "69b"}, {"name": "69a"}, {"name": "68"}, {"name": "67"}, {"name": "66"}, {"name": "65"}, {"name": "64"}, {"name": "63"}, {"name": "62"}, {"name": "61"}, {"name": "60"}, {"name": "59"}, {"name": "58"}, {"name": "57"}, {"name": "56"}, {"name": "55"}, {"name": "54"}, {"name": "53"}, {"name": "52"}, {"name": "51"}, {"name": "50"}, {"name": "49"}, {"name": "48"}, {"name": "47"}, {"name": "46"}, {"name": "45"}, {"name": "44"}, {"name": "43"}, {"name": "42"}, {"name": "41"}, {"name": "40c"}, {"name": "40b"}, {"name": "40a"}, {"name": "39"}, {"name": "38"}, {"name": "37"}, {"name": "36"}, {"name": "35"}, {"name": "34"}, {"name": "33"}, {"name": "32"}, {"name": "31"}, {"name": "30"}, {"name": "29"}, {"name": "28"}, {"name": "27"}, {"name": "26"}, {"name": "25"}, {"name": "24"}, {"name": "23b"}, {"name": "23a"}, {"name": "22"}, {"name": "21"}, {"name": "20"}, {"name": "19"}, {"name": "18"}, {"name": "17"}, {"name": "16"}, {"name": "15"}, {"name": "14"}, {"name": "13"}, {"name": "12"}, {"name": "11"}, {"name": "10"}, {"name": "9"}, {"name": "8"}, {"name": "7"}, {"name": "6"}, {"name": "5"}, {"name": "4"}, {"name": "3"}, {"name": "2"}, {"name": "1"}]') #Check JSON for Session 992 correct, reversed because django html loop starts from end
+
+    def testgetTOPSAJAXSSuccess2(self):
+        request = self.factory.get("/getTopsAJAX/?sNumber=973")
+        request.user = AnonymousUser()
+
+        response = getTopsAJAX(request)
+        self.assertEqual(response.status_code, 200)
+        topHTML = response.content.decode()
+
+        self.assertTrue(topHTML == '[{"name": "47"}, {"name": "46"}, {"name": "45"}, {"name": "44"}, {"name": "43"}, {"name": "42"}, {"name": "41"}, {"name": "40"}, {"name": "39"}, {"name": "38"}, {"name": "37"}, {"name": "36"}, {"name": "35"}, {"name": "34"}, {"name": "33"}, {"name": "32"}, {"name": "31"}, {"name": "30"}, {"name": "29"}, {"name": "28"}, {"name": "27"}, {"name": "26"}, {"name": "25c"}, {"name": "25b"}, {"name": "25a"}, {"name": "24"}, {"name": "23"}, {"name": "22"}, {"name": "21"}, {"name": "20"}, {"name": "19"}, {"name": "18"}, {"name": "17"}, {"name": "16"}, {"name": "15"}, {"name": "14"}, {"name": "13"}, {"name": "12"}, {"name": "11"}, {"name": "10"}, {"name": "9"}, {"name": "8"}, {"name": "7"}, {"name": "6"}, {"name": "5"}, {"name": "4"}, {"name": "3"}, {"name": "2"}, {"name": "1"}]') #Check JSON for Session 973 correct, reversed because django html loop starts from end
+
+    def testgetTOPSAJAXSsNumberMissing(self):
+        request = self.factory.get("/getTopsAJAX/")
+        request.user = AnonymousUser()
+
+        response = getTopsAJAX(request)
+        self.assertEqual(response.status_code, 404)
+        topHTML = response.content.decode()
+        self.assertTrue(topHTML == "{}") #Empty JSON
+
+    def testgetTOPSAJAXSsNumberWrongType(self):
+        request = self.factory.get("/getTopsAJAX/?sNumber=a")
+        request.user = AnonymousUser()
+
+        response = getTopsAJAX(request)
+        self.assertEqual(response.status_code, 404)
+        topHTML = response.content.decode()
+        self.assertTrue(topHTML == "{}") #Empty JSON
+
+    def testgetTOPSAJAXSsNumberTooLow(self):
+        request = self.factory.get("/getTopsAJAX/?sNumber=909")
+        request.user = AnonymousUser()
+
+        response = getTopsAJAX(request)
+        self.assertEqual(response.status_code, 404)
+        topHTML = response.content.decode()
+        self.assertTrue(topHTML == "{}") #Empty JSON
