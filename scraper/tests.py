@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 
-from .views import index,loadJSON #Needs __init__.py in same folder, else error when executing tests
+from .views import index,loadJSON,metaStudies #Needs __init__.py in same folder, else error when executing tests
 from .models import Json, JsonCountyPDFLinks
 import json
 
@@ -45,7 +45,6 @@ class Tests(TestCase):
         request = self.factory.get("/")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = index(request)
         self.assertEqual(response.status_code, 200)
 
@@ -58,7 +57,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=992&topNumber=4") #Session 992, TOP 4 is latest TOP with 3 bars none zero and 1 bar zero
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 200)
 
@@ -87,7 +85,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=973&topNumber=25b") #Session 973, TOP 25a is a TOP with all four bars present
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 200)
 
@@ -116,7 +113,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=973&topNumber=1337")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -128,7 +124,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=973")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -140,7 +135,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?topNumber=1")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -152,7 +146,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -164,7 +157,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=a&topNumber=1")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -176,7 +168,6 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=990&topNumber=a")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
@@ -188,13 +179,37 @@ class Tests(TestCase):
         request = self.factory.get("/loadJSON?sessionNumber=909&topNumber=1")
         request.user = AnonymousUser()
 
-        # Test my_view() as if it were deployed at /customer/details
         response = loadJSON(request)
         self.assertEqual(response.status_code, 404)
 
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "909" existiert kein Tagesordnungspunkt "1". Bitte suchen Sie erneut.' in searchHTML)
         self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
+    
+    def testMetaStudies(self):
+        request = self.factory.get("/metaStudies")
+        request.user = AnonymousUser()
+
+        response = metaStudies(request)
+        self.assertEqual(response.status_code, 200)
+
+        metaHTML = response.content.decode()
+
+        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in metaHTML) #Check 992 as session selected in search bar
+
+        #Test Title correct
+        self.assertTrue("Meta-Analysen der Bundesrats-Sitzungen 910 - {}".format(self.currentSession) in metaHTML)
+
+        #Test first diagram correct
+        self.assertTrue('<div class="bar yes" data-value="322"' in metaHTML) #322 zustimmungsbedürftige Gesetze
+        self.assertTrue('<div class="bar other" data-value="581"' in metaHTML) #581 Einspruchsgesetze
+
+        # Test second diagram correct
+        self.assertTrue('<div class="bar yes" data-value="292"' in metaHTML) #292 Yes
+        self.assertTrue('<div class="bar no" data-value="12"' in metaHTML) #12 No
+        self.assertTrue('<div class="bar abstention" data-value="8"' in metaHTML) #8 abstained
+        self.assertTrue('<div class="bar other" data-value="10"' in metaHTML) #10 No Result published
+
 
 #TODO Test AJAX
 #TODO Check GET Parameter AJAX

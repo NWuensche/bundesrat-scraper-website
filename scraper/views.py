@@ -349,7 +349,7 @@ def getPartitionSizesZustimmLaws():
             topCategory = top.get("law_category", "")
             if topCategory == "Zustimmungsbedürftiges Gesetz":
                 tenor = top.get("beschlusstenor", "")
-                if tenor in ["Zustimmung; Entschließung", "Zustimmung; Entschließungen", "Zustimmung"]:
+                if tenor in ["Zustimmung; Entschließung", "Zustimmung; Entschließungen", "Feststellung, dass das Gesetz der Zustimmung des Bundesrates mit zwei Dritteln seiner Stimmen bedarf, Zustimmung, Entschließung", "Zustimmung"]:
                     numZustimmLawsYES += 1
                 elif tenor in ["Versagung der Zustimmung", "Anrufung des Vermittlungsausschusses", "Stellungnahme"]: #Stellungnahme from 948 1a, seems to be a NO
                     numZustimmLawsNO += 1
@@ -357,6 +357,8 @@ def getPartitionSizesZustimmLaws():
                     numZustimmLawsTOPRemoval += 1
                 elif  tenor == "":
                     numZustimmLawsMISSING += 1
+                else: #Raise Error if one text can't be categorized. Don't do this for senats texts, as there are to many to successfully parse all right now
+                    raise Exception('Cannot get opinion from following tenor text: "{}".'.format(tenor))
     return (numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING)
 
 #If DB is empty, load JSONs from GitHub repo
