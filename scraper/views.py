@@ -79,6 +79,7 @@ def metaStudies(request):
 def getTopsAJAX(request):
     initDBIfEmpty()
 
+    #TODO Error if not int
     sessionNumber = int(request.GET['sNumber']) #Currently selected session in search
 
     # Get TOPs for given session
@@ -97,13 +98,20 @@ def getTopsAJAX(request):
 # Returns senats texts and number of opinions and meta data for given TOP of given session
 def loadJSON(request):
     initDBIfEmpty()
+    sessionNumbers = getSessionNumbers() #Always given to request
 
     # Get reqeustion session number and TOP
     #TODO Still Error if parameters not present
-    sessionNumber = int(request.GET["sessionNumber"])
-    topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
+    try:
+        sessionNumber = request.GET["sessionNumber"]
+    except:
+        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingSessionNumber": True}, status=404)
+
+    try:
+        topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
+    except:
+        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingTOPNumber": True}, status=404) #Havent valiaded session number by now, so I shouldn't give it to html file
     if not validTOP(sessionNumber, topNumber):
-        sessionNumbers = getSessionNumbers()
         return render(request, "error.html", {"sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "top": topNumber}, status=404)
 
     sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
@@ -114,7 +122,7 @@ def loadJSON(request):
     numYES, numNO, numABSTENTION, numOTHER = countSizeParitionsOpinions(opinions)
     sessionNumbers = getSessionNumbers()
 
-    return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER})
+    return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": int(sessionNumber), "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER}) #If currentSessionNumber not int, then search bar gets reset to session 992 
 
 #Takes session number and TOP
 #Returns if this session contains the TOP
@@ -148,7 +156,7 @@ def getMetaDataTOP(sessionNumber, topNumber):
     sessionURL = ""
     allTOPs = []
     for session in brJSON:
-        if int(session['number']) == sessionNumber: 
+        if int(session['number']) == int(sessionNumber): 
             sessionURL = session['url']
             for top in session["tops"]:
                 if top["number"] == topNumber:

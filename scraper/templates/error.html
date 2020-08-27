@@ -7,7 +7,16 @@
 
 <div class="container">
   <p class="lead" >
-   Für die Sitzung {{currentSessionNumber}} existiert kein Tagesordnungspunkt {{top}}.
+      {% if missingSessionNumber %}  {# sessionNumber as GET parameter missing  #}
+        Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut.
+
+      {% elif missingTOPNumber %}  {# topNumber as GET parameter missing  #}
+
+        Leider wurde kein Tagesordnungspunkt übergeben. Bitte suchen Sie erneut.
+     {% else %}
+
+     Für die Sitzung "{{currentSessionNumber}}" existiert kein Tagesordnungspunkt "{{top}}". Bitte suchen Sie erneut.{# <q> tags make problems in tests#}
+            {% endif %}
 
 </p>
 
