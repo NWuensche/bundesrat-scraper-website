@@ -121,7 +121,7 @@ class Tests(TestCase):
         self.assertEqual(response.status_code, 404)
 
         searchHTML = response.content.decode()
-        self.assertTrue("Für die Sitzung 973 existiert kein Tagesordnungspunkt 1337. Bitte suchen Sie erneut." in searchHTML)
+        self.assertTrue('Für die Sitzung "973" existiert kein Tagesordnungspunkt "1337". Bitte suchen Sie erneut.' in searchHTML)
         self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error, although 973 is valid session I don't check this at this point, so I don't give it as a parameter to the html file
 
     def testSearchResultTOPMissing(self):
@@ -171,10 +171,30 @@ class Tests(TestCase):
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "a" existiert kein Tagesordnungspunkt "1". Bitte suchen Sie erneut.' in searchHTML)
         self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
-        #TODO Check das Search Bar wieder auf 992
-        #TODO Check right error messages
 
-#TODO Malformed sessionnumber (letters
-#TODO Test das beide Parameter present, separat
+    def testSearchResultBothPresentTOPMalformed(self):
+        request = self.factory.get("/loadJSON?sessionNumber=990&topNumber=a")
+        request.user = AnonymousUser()
+
+        # Test my_view() as if it were deployed at /customer/details
+        response = loadJSON(request)
+        self.assertEqual(response.status_code, 404)
+
+        searchHTML = response.content.decode()
+        self.assertTrue('Für die Sitzung "990" existiert kein Tagesordnungspunkt "a". Bitte suchen Sie erneut.' in searchHTML)
+        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
+
+    def testSearchResultBothPresentSessionToLow(self):
+        request = self.factory.get("/loadJSON?sessionNumber=909&topNumber=1")
+        request.user = AnonymousUser()
+
+        # Test my_view() as if it were deployed at /customer/details
+        response = loadJSON(request)
+        self.assertEqual(response.status_code, 404)
+
+        searchHTML = response.content.decode()
+        self.assertTrue('Für die Sitzung "909" existiert kein Tagesordnungspunkt "1". Bitte suchen Sie erneut.' in searchHTML)
+        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
+
 #TODO Test AJAX
 #TODO Check GET Parameter AJAX

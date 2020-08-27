@@ -101,7 +101,6 @@ def loadJSON(request):
     sessionNumbers = getSessionNumbers() #Always given to request
 
     # Get reqeustion session number and TOP
-    #TODO Still Error if parameters not present
     try:
         sessionNumber = request.GET["sessionNumber"]
     except:
@@ -112,7 +111,7 @@ def loadJSON(request):
     except:
         return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingTOPNumber": True}, status=404) #Havent valiaded session number by now, so I shouldn't give it to html file
     if not validTOP(sessionNumber, topNumber):
-        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "currentSessionNumber": sessionNumber, "top": topNumber}, status=404)
+        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "inputSessionNumber": sessionNumber, "inputTOP": topNumber}, status=404) #session number and top could be malformed, so don't give them names currentSessionNumber/currentTOP as this can damage search bar with its parameters
 
     sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
 

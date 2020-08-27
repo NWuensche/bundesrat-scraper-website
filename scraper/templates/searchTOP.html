@@ -11,7 +11,10 @@
         <form class="navbar-form navbar-left" method="GET" action="loadJSON">
         <select class="form-control"  name="sessionNumber" id="sessionNumber" >
             {% for sessionNumber in sessionNumbers %}
-            {% if currentSessionNumber  and currentSessionNumber == sessionNumber %}  {# Select last selected session, if available #}
+            {% if not currentSessionNumber and forloop.counter0 == 0 %} {# nothing to select -> give select property to first option#}
+              <option value="{{sessionNumber}}" selected>Sitzung {{sessionNumber}}</option>
+
+            {% elif currentSessionNumber  and currentSessionNumber == sessionNumber %}  {# Select last selected session, if available #}
 
               <option value="{{sessionNumber}}" selected>Sitzung {{sessionNumber}}</option>
             {% else %}
