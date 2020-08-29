@@ -53,7 +53,6 @@ class Tests(TestCase):
         self.assertTrue('<a href="https://www.bundesrat.de/SharedDocs/TO/{}/to-node.html">hier</a>'.format(self.currentSession) in indexHTML) #Check right link to latest session
 
     def testSearchResultSuccess(self):
-        #TODO Test Search Bar
         request = self.factory.get("/loadJSON?sessionNumber=992&topNumber=4") #Session 992, TOP 4 is latest TOP with 3 bars none zero and 1 bar zero
         request.user = AnonymousUser()
 
@@ -65,6 +64,7 @@ class Tests(TestCase):
         self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar
 
         #Test meta data present and correct
+        #self.assertTemplateUsed needs more setup (Django test Client), threrefore I check signal strings so that I know right template was used.
         self.assertTrue("TOP 992/4" in searchHTML)
         self.assertTrue("Titel: 320/20 Gesetz zur Verbesserung der Hilfen für Familien bei Adoption (Adoptionshilfe-Gesetz)" in searchHTML)
         self.assertTrue("Kategorie: Zustimmungsbedürftiges Gesetz" in searchHTML)
@@ -76,6 +76,7 @@ class Tests(TestCase):
         self.assertTrue('<th>Ablehnung</th>' in searchHTML) #Check opinion parsed correctly
 
         #Check Diagram
+        #self.assertContains could check for semanticly same HTML, but this method always raises error for some reason
         self.assertTrue('<div class="bar yes" data-value="3"' in searchHTML) #3 counties voted with YES, style floating points change randomly
         self.assertTrue('<div class="bar no" data-value="3"' in searchHTML) #3 counties voted with NO
         self.assertTrue('<div class="bar abstention" data-value="10"' in searchHTML) #10 counties voted with ABSTENTION

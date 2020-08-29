@@ -79,7 +79,6 @@ def metaStudies(request):
 def getTopsAJAX(request):
     initDBIfEmpty()
 
-    #TODO Error if not int
     try:
         sessionNumber = request.GET["sNumber"] # TODO Rename to sessionNumber like `loadJSON` Parameter
     except:
@@ -244,7 +243,7 @@ def countSizeParitionsOpinions(opinions):
     return numYES, numNO, numABSTENTION, numOTHER
 
 #In: some senats text
-#Out: Return YES/NO/ABSTENTION if matches keywords TODO Is there an extra/third "Anruf VA" opinion?
+#Out: Return YES/NO/ABSTENTION if matches keywords
 #Out: Else return original text
 def extractOpinionSenatsText(senatsText):
 
