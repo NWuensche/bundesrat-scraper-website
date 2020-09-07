@@ -250,7 +250,7 @@ def extractOpinionSenatsText(senatsText):
     #Order important! "keine Zustimmung"(NO) before "Zustimmung" (YES)
     text = senatsText
     text = replaceStringIfSomeMatchWith(text, ["abgesetzt", "Absetzung"], "DONTKNOWOPINION") # 988 7
-    text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt",
+    text = replaceStringIfSomeMatchWith(text, ["keine zustimmung", "ablehnung", "keine Unterstützung der Ausschussempfehlungen","Keine Unterstützung der Entschließung", "nicht zuzustimmen", "nicht zugestimmt", "Nein zu",
         "Nichtfassen der Entschließung" #BAY 981 14
         ], CONSTS.NO )
     text = replaceStringIfSomeMatchWith(text, ["enthaltung", "Absehen von einer Stellungnahme", "enthalten", "Kenntnisnahme der Ausschussverweisung", "Kenntnis zu nehmen", "Kenntnisnahme", "Keine Äußerung", "Keine Stellungnahme", "Von einer Äußerung und einem Beitritt wird abgesehen", "von der Vorlage Kenntnis genommen", "von einer Äußerung und einem Beitritt abzusehen", "hat sich zu dem Verfahren nicht geäußert", "von Äußerung und Beitritt absehen", "Absehen von Stellungnahme", "nicht abzustimmen", "es wird festgestellt, dass der Vermittlungsausschuss nicht angerufen wird" ], CONSTS.ABSTENTION ) #"Enthaltung zur Zustimmung zum Gesetz" exists, so check before YES
@@ -286,6 +286,7 @@ def extractOpinionSenatsText(senatsText):
                 "Freie Hand", #Bremen 988 1a
                 "Fassen der Entschließung nach Maßgaben unterstützt",
                 "mit den Stimmen Hamburgs zugestimmt",
+                "hat mit den Stimmen Hamburgs",
 
                 "Verweisung in die Ausschüsse", #Next ones exist only for "Gesetzesentwürfe" (e.g. 981 18), not for "Gesetzesbeschlüsse", "Ausschuss" != "Vermittlungsausschuss
                 "Ausschussüberweisung",
