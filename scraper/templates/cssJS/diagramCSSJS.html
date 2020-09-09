@@ -1,85 +1,82 @@
-  <style type="text/css">
-/** Code Inspired By Webdevtrick ( https://webdevtrick.com ) **/
-body {
-  color: #212121;
-  line-height: 1;
-}
-.diagram {
-  width: 100%;
-}
-.bar {
 
-  width: 0%;
-  margin: .25em 0;
-  position: relative;
-  transition: width 2s, background .2s ;
-}
-.bar .label {
-  padding: 1em;
-  background: #212121;
-  width: auto;
-  display: inline-block;
-  position: relative;
-  z-index: 2;
-  font-weight: bold;
-  white-space: pre; 
-}
-.count {
-  position: absolute;
-  background:#fff;
-  right: -2em;
-  top: .45em;
-  padding: .15em;
-  font-weight: bold;
-  color: #000;
-}
-.bar.yes {
-  background: #00e500;
-}
-.bar.no {
-  background: #cc0000;
-}
-.bar.abstention {
-  background: #9d9d9d;
-}
-.bar.other {
-  background: #555ed9;
-}
-  </style>
+<style type="text/css">
 
-
-
-
-  <script>
     /** Code Inspired By Webdevtrick ( https://webdevtrick.com ) **/
+    body {
+      color: #212121;
+      line-height: 1;
+    }
+    .diagram {
+      width: 100%;
+    }
+    .bar {
+
+      width: 0%;
+      margin: .25em 0;
+      position: relative;
+      transition: width 2s, background .2s ;
+    }
+    .bar .label {
+      padding: 1em;
+      background: #212121;
+      width: auto;
+      display: inline-block;
+      position: relative;
+      z-index: 2;
+      font-weight: bold;
+      white-space: pre;
+    }
+    .count {
+      position: absolute;
+      background:#fff;
+      right: -2em;
+      top: .45em;
+      padding: .15em;
+      font-weight: bold;
+      color: #000;
+    }
+    .bar.yes {
+      background: #00e500;
+    }
+    .bar.no {
+      background: #cc0000;
+    }
+    .bar.abstention {
+      background: #9d9d9d;
+    }
+    .bar.other {
+      background: #555ed9;
+    }
+
+</style>
+
+<script>
+
+    /** Code Inspired By Webdevtrick ( https://webdevtrick.com ) **/
+    setTimeout(function start (){
+
+      $('.bar').each(function(i){
+        var $bar = $(this);
+        $(this).append('<span class="count">'+ $(this).attr('data-value')+ '</span>');
+        offsetLabel = 0; //In percent
+        offsetCount = 0; //In percent
 
 
-setTimeout(function start (){
-  
-  $('.bar').each(function(i){  
-    var $bar = $(this);
-    $(this).append('<span class="count">'+ $(this).attr('data-value')+ '</span>');
-    offsetLabel = 0; //In percent
-    offsetCount = 0; //In percent
+        setTimeout(function(){
 
+            offsetLabel =  $($bar.children()[0]).css("width"); //Absolute width of vote label (Zustimmung/...) with "px" postfix, .width() is somehow to small
+            offsetLabel = offsetLabel.substring(0, offsetLabel.length - 2); // 90px -> "90"
+            d = $("div.container")
+            offsetLabelPercent = offsetLabel/ d.width() * 100 ; //To add s.t. 0 for 0 votes is visible too
 
-    setTimeout(function(){
+            offsetNumber =  $($bar.children()[1]).css("width"); //Absolute width of vote number with "px" postfix, .width() is somehow to small
+            offsetNumber = offsetNumber.substring(0, offsetNumber.length - 2); // 90px -> "90"
+            offsetNumberPercent = offsetNumber/ $( window ).width() * 100 ; //To subtract s.t. for 16 votes, number of votes still in 100% range and not out of bounce
+            diagramSumXValues=$($bar.parent().parent()).attr("diagramSumXValues");
+            $bar.css('width',(($bar.attr('data-value')/diagramSumXValues * (100 - offsetLabelPercent - offsetNumberPercent) + offsetLabelPercent)+"%" )); {# Use diagramSumXValues because use diagram for 16 counties as well ~1000 laws (different scales needed) + 2 differnt scales on same page (meta-study) #}
+        }, i  );
+      });
 
-        offsetLabel =  $($bar.children()[0]).css("width"); //Absolute width of vote label (Zustimmung/...) with "px" postfix, .width() is somehow to small
-        offsetLabel = offsetLabel.substring(0, offsetLabel.length - 2); // 90px -> "90"
-        d = $("div.container")
-        offsetLabelPercent = offsetLabel/ d.width() * 100 ; //To add s.t. 0 for 0 votes is visible too
+    }, 500) //Time in ms before something happens
 
-        offsetNumber =  $($bar.children()[1]).css("width"); //Absolute width of vote number with "px" postfix, .width() is somehow to small
-        offsetNumber = offsetNumber.substring(0, offsetNumber.length - 2); // 90px -> "90"
-        offsetNumberPercent = offsetNumber/ $( window ).width() * 100 ; //To subtract s.t. for 16 votes, number of votes still in 100% range and not out of bounce
-      diagramSumXValues=$($bar.parent().parent()).attr("diagramSumXValues");
-      $bar.css('width',(($bar.attr('data-value')/diagramSumXValues * (100 - offsetLabelPercent - offsetNumberPercent) + offsetLabelPercent)+"%" )); {# Use diagramSumXValues because use diagram for 16 counties as well ~1000 laws (different scales needed) + 2 differnt scales on same page (meta-study) #}
-    }, i  );
-  });
-
-
-}, 500) //Time in ms before something happens
-    </script>
-
-
+</script>

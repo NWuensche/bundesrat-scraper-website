@@ -5,23 +5,17 @@
 
 {% include 'searchTOP.html' %}
 
+
 <div class="container">
   <p class="lead" >
-      {% if missingSessionNumber %}  {# sessionNumber as GET parameter missing  #}
-        Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut.
-
-      {% elif missingTOPNumber %}  {# topNumber as GET parameter missing  #}
-
-        Leider wurde kein Tagesordnungspunkt übergeben. Bitte suchen Sie erneut.
-     {% else %}
-
-     Für die Sitzung "{{inputSessionNumber}}" existiert kein Tagesordnungspunkt "{{inputTOP}}". Bitte suchen Sie erneut.{# <q> tags make problems in tests#}
-            {% endif %}
-
-</p>
-
+        {% if missingSessionNumber %}  {# sessionNumber as GET parameter missing  #}
+            Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut.
+        {% elif missingTOPNumber %}  {# topNumber as GET parameter missing  #}
+            Leider wurde kein Tagesordnungspunkt übergeben. Bitte suchen Sie erneut.
+        {% else %}
+            Für die Sitzung "{{inputSessionNumber}}" existiert kein Tagesordnungspunkt "{{inputTOP}}". Bitte suchen Sie erneut.{# <q> tags make problems in tests#}
+        {% endif %}
+  </p>
 </div>
-
-
 
 {% endblock %}
