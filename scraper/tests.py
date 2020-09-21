@@ -105,8 +105,8 @@ class Tests(TestCase):
         self.assertTrue('<th>Zustimmung</th>' in searchHTML) #Check opinion parsed correctly
 
         #Check Diagram
-        self.assertTrue('<div class="bar yes" data-value="4"' in searchHTML) #4 counties voted with YES, style floating points change randomly
-        self.assertTrue('<div class="bar no" data-value="2"' in searchHTML) #2 counties voted with NO
+        self.assertTrue('<div class="bar yes" data-value="3"' in searchHTML) #4 counties voted with YES, style floating points change randomly
+        self.assertTrue('<div class="bar no" data-value="3"' in searchHTML) #2 counties voted with NO
         self.assertTrue('<div class="bar abstention" data-value="4"' in searchHTML) #4 counties voted with ABSTENTION
         self.assertTrue('<div class="bar other" data-value="6"' in searchHTML) #6 texts couldn't be parsed
 
