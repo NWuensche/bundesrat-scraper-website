@@ -8,7 +8,9 @@
 
 <div class="container">
   <p class="lead" >
-        {% if missingSessionNumber %}  {# sessionNumber as GET parameter missing  #}
+        {% if noSearchString %}  {# searchString as GET parameter missing (searchTOPTitles)  #}
+            Leider wurde keine Suchanfrage übergeben. Bitte suchen Sie erneut.
+        {% elif missingSessionNumber %}  {# sessionNumber as GET parameter missing  #}
             Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut.
         {% elif missingTOPNumber %}  {# topNumber as GET parameter missing  #}
             Leider wurde kein Tagesordnungspunkt übergeben. Bitte suchen Sie erneut.
