@@ -30,9 +30,9 @@
 
     <form class="navbar-form navbar-left" method="GET" action="searchTOPTitles">
       {% if searchString %} {# redraw old search string, else not #}
-        <input type="text" class="form-control" name="searchString" value="{{searchString}}"></input>
+      <input type="text" class="form-control" name="searchString" value="{{searchString}}"></input> {# INFO OK to allow empty search string, doesn't take too long to list all TOPs #}
       {% else %}
-        <input type="text" class="form-control" name="searchString" placeholder="Klima, Haushalt,... "></input>
+        <input type="text" class="form-control" name="searchString" placeholder="Klima, Haushalt,... "></input> {# INFO OK to allow empty search string, doesn't take too long to list all TOPs #}
       {% endif %}
 
       <button class="btn btn-primary" type="submit" id="btnSearchTOPTitles">Suche in Beschlüssen</button>
