@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+{% include 'searchTOP.html' %}
+
+<div class="container">
+  <div class="page-header">
+
+    {% if not resultList %}  {# No results for searchString found   #}
+      <h2>
+        Keine Suchergebnisse für "{{searchString}}" gefunden!
+      </h2>
+    {% else %}  {# Some results there #}
+
+      <h2>
+        Suchergebnisse für "{{searchString}}":
+      </h2>
+
+      {# List of Tuples of (TOPTitle - 0, TOPNumber - 1, Sessionnumber - 2, sessionDate - 3) #}
+      <ul>
+      {% for result in resultList %}
+      <li>
+        <p class = "lead"><a href="loadJSON?sessionNumber={{result.2}}&topNumber={{result.1}}">{{result.0}}</a> <small>(Tagesordnungspunkt {{result.1}} von der {{result.2}}. Sitzung am {{result.3}}) </small></p>
+      </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
