@@ -267,6 +267,7 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue('Leider wurde keine Suchanfrage übergeben. Bitte suchen Sie erneut.' in searchHTML)
+        self.assertTrue('<input type="text" class="form-control" name="searchString" placeholder="Klima, Haushalt,... ">' in searchHTML)
 
     def testSearchTitlesNoResultsForString(self):
         request = self.factory.get("/searchTOPTitles?searchString=Nothing")
@@ -278,6 +279,8 @@ class Tests(TestCase):
         searchHTML = response.content.decode()
         self.assertTrue('Keine Suchergebnisse für "Nothing" gefunden!' in searchHTML)
 
+        self.assertTrue('<input type="text" class="form-control" name="searchString" value="Nothing"' in searchHTML)
+
     def testSearchTitlesSomeResultsForString(self):
         request = self.factory.get("/searchTOPTitles?searchString=620%2F18") #Search 620/18, only one result
         request.user = AnonymousUser()
@@ -288,3 +291,4 @@ class Tests(TestCase):
         searchHTML = response.content.decode()
         self.assertTrue('620/18 Mitteilung der Kommission an das Europäische Parlament, den Europäischen Rat, den Rat, die Europäische Zentralbank, den Europäischen Wirtschafts- und Sozialausschuss und den Ausschuss der Regionen: Kapitalmarktunion - Zeit für neue Anstrengungen zugunsten konkreter Ergebnisse bei Investitionen, Wachstum und stärkerer Rolle des Euro' in searchHTML)
         self.assertTrue('loadJSON?sessionNumber=974&topNumber=999c' in searchHTML) #Correct redirect link for search
+        self.assertTrue('<input type="text" class="form-control" name="searchString" value="620/18"' in searchHTML)
