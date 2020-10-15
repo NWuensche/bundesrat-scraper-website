@@ -432,3 +432,56 @@ def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
     json = jsonResponse.content.decode() #If one doesn't decode bytearray, there is a problem when storing (bytearray) string and rereading it later to json
     rowTable = TableName(county=countyName, json=json) #Init new row
     rowTable.save()
+
+# function for "/searchTOPTitles" requests
+# Returns all TOPs+Links that contain keyword
+def searchTOPTitles(request):
+    #TODO All always lowercase
+    initDBIfEmpty()
+    sessionNumbers = getSessionNumbers() #Always given to request
+
+    # Get reqeustion session number and TOP
+    # TODO Update for current params
+    try:
+        searchString = request.GET["searchString"]
+    except:
+        return render(request, "error.html", {"noSearchString": True}, status=404)
+
+#TODO What happens for empty string? space? maybe at least 2 letters? Check ie then
+#TODO Show search again
+#Check links work with e.g. 1*a*
+    # List of Tuples of (TOPTitle, TOPNumber, Sessionnumber, sessionDate)
+    resultList = getMatchingTOPs(searchString)
+
+    #TOP what happens with current session? 992?
+    return render(request, "searchTOPTitlesResults.html", {"sessionNumbers": sessionNumbers, "resultList": resultList, "searchString": searchString }) #If currentSessionNumber not int, then search bar gets reset to session 992 
+
+
+# Return all TOPs that have searchString in title + More data
+# List of Tuples of (TOPTitle, TOPNumber, Sessionnumber, sessionDate)
+#SessionDate has format "DD.MM.YYYY"
+def getMatchingTOPs(searchString):
+    searchString = searchString.lower()
+
+    resultList = []
+    brRow = Json.objects.get(county="bundesrat")
+    brJSON = json.loads(brRow.json)
+    for session in brJSON:
+       sessionNumber = session['number']
+       sessionTimestamp = session['timestamp']
+       sessionDate = convertSessionTimestampToDate(sessionTimestamp)
+       for top in session["tops"]:
+           topTitle = top['title']
+           if searchString in topTitle.lower():
+               topNumber = top['number']
+               resultList.append( (topTitle, topNumber, sessionNumber, sessionDate) )
+    return resultList
+
+#Convert Timestamp to Date
+#In: SessionTimestamp has format e.g. 2020-07-03T09:30:00
+#Out: SessionDate has format e.g. "DD.MM.YYYY"
+def convertSessionTimestampToDate(sessionTimestamp):
+    REGEX=r"([^-]*)-([^-]*)-([^-]*)T.*"
+    year, month, day = re.match(REGEX, sessionTimestamp).groups()
+    return "{}.{}.{}".format(day, month, year)
+
