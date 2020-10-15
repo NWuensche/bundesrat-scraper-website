@@ -19,4 +19,5 @@ urlpatterns = [
     path("getTopsAJAX/", scraper.views.getTopsAJAX, name="getTopsAJAX/"),
     path("loadJSON", scraper.views.loadJSON, name="loadJSON"),
     path("metaStudies", scraper.views.metaStudies, name="metaStudies"),
+    path("searchTOPTitles", scraper.views.searchTOPTitles, name="searchTOPTitles"),
 ]

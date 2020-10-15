@@ -4,7 +4,7 @@ This is the UI for the [Bundesrat Scraper](https://github.com/okfde/bundesrat-sc
 
 The website and scraper, including the data, scraper and website code, are unofficial. The `Bundesrat` has nothing to do with it. There is no warranty that the scraped data is correct or complete or the website displays the correct information.
 
-You can search either for given session and Tagesordnungspunkt(TOP) numbers. To get the appropriate numbers for your law of choice, search on the [Official Bundesrat Website](https://www.bundesrat.de/DE/service/archiv/to-archiv/to-archiv-node.html) for the law name.
+You can search either for some keyword in all Tagesordnungspunkt(TOP) titles.
 
 ## Initialize
 
