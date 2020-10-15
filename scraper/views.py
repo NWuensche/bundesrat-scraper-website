@@ -74,31 +74,6 @@ def metaStudies(request):
 
     return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramSumLaws": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws, "numZustimmLawsYES": numZustimmLawsYES, "numZustimmLawsNO": numZustimmLawsNO, "numZustimmLawsTOPRemoval": numZustimmLawsTOPRemoval,  "numZustimmLawsMISSING": numZustimmLawsMISSING})
 
-# function for "/getTopsAJAX" AJAX requests
-# Used when session in search changed
-def getTopsAJAX(request):
-    initDBIfEmpty()
-
-    try:
-        sessionNumber = request.GET["sNumber"] # TODO Rename to sessionNumber like `loadJSON` Parameter
-    except:
-        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty. AJAX call, so no error message
-
-    if not isValidSessionNumber(sessionNumber):
-        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty, AJAX call, so no error message
-
-    # Get TOPs for given session
-    brRow = Json.objects.get(county="bundesrat")
-    brJSON = json.loads(brRow.json)
-    for session in brJSON:
-        if int(session['number']) == int(sessionNumber):
-            allTOPs = list(map(lambda top: {'name': top["number"]}, session["tops"]))
-            allTOPs.reverse() #TOP 1 at the start afterwards
-            break
-
-    return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize response without content_type
-
-
 # function for "/loadJSON" requests
 # Returns senats texts and number of opinions and meta data for given TOP of given session
 def loadJSON(request):
