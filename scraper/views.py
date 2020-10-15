@@ -67,56 +67,31 @@ def metaStudies(request):
     initDBIfEmpty()
     numZustimmLaws, numEntscheidungsLaws = getNumberOfLaws()
     numZustimmLawsYES, numZustimmLawsNO, numZustimmLawsTOPRemoval, numZustimmLawsMISSING = getPartitionSizesZustimmLaws()
-    sessionNumbers = getSessionNumbers() #For Navbar on result site
+
+    sessionNumbers = getSessionNumbers()
     #Need min/max session numbers to show user for which session the Meta-Study applies to
     minSessionNumber = min(sessionNumbers)
     maxSessionNumber = max(sessionNumbers)
 
     return render(request, "meta.html", {"sessionNumbers": sessionNumbers, "minSessionNumber": minSessionNumber, "maxSessionNumber": maxSessionNumber,  "diagramSumLaws": (numZustimmLaws + numEntscheidungsLaws),  "numZustimmLaws": numZustimmLaws, "numEntscheidungsLaws": numEntscheidungsLaws, "numZustimmLawsYES": numZustimmLawsYES, "numZustimmLawsNO": numZustimmLawsNO, "numZustimmLawsTOPRemoval": numZustimmLawsTOPRemoval,  "numZustimmLawsMISSING": numZustimmLawsMISSING})
 
-# function for "/getTopsAJAX" AJAX requests
-# Used when session in search changed
-def getTopsAJAX(request):
-    initDBIfEmpty()
-
-    try:
-        sessionNumber = request.GET["sNumber"] # TODO Rename to sessionNumber like `loadJSON` Parameter
-    except:
-        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty. AJAX call, so no error message
-
-    if not isValidSessionNumber(sessionNumber):
-        return HttpResponse("{}", content_type='application/json', status=404) #Doesn't recognize response without content_type, empty JSON shouldn't harm anything, only top selection empty, AJAX call, so no error message
-
-    # Get TOPs for given session
-    brRow = Json.objects.get(county="bundesrat")
-    brJSON = json.loads(brRow.json)
-    for session in brJSON:
-        if int(session['number']) == int(sessionNumber):
-            allTOPs = list(map(lambda top: {'name': top["number"]}, session["tops"]))
-            allTOPs.reverse() #TOP 1 at the start afterwards
-            break
-
-    return HttpResponse(json.dumps(allTOPs), content_type='application/json') #Doesn't recognize response without content_type
-
-
 # function for "/loadJSON" requests
 # Returns senats texts and number of opinions and meta data for given TOP of given session
 def loadJSON(request):
     initDBIfEmpty()
-    sessionNumbers = getSessionNumbers() #Always given to request
 
     # Get reqeustion session number and TOP
     try:
         sessionNumber = request.GET["sessionNumber"]
     except:
-        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingSessionNumber": True}, status=404)
+        return render(request, "error.html", {"missingSessionNumber": True}, status=404)
 
     try:
         topNumber = request.GET["topNumber"] #Is Subpart + Number, but name in JSON also topNumber, so leave it
     except:
-        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "missingTOPNumber": True}, status=404) #Havent valiaded session number by now, so I shouldn't give it to html file
+        return render(request, "error.html", {"missingTOPNumber": True}, status=404) #Havent valiaded session number by now, so I shouldn't give it to html file
     if not isValidTOP(sessionNumber, topNumber):
-        return render(request, "error.html", {"sessionNumbers": sessionNumbers, "inputSessionNumber": sessionNumber, "inputTOP": topNumber}, status=404) #session number and top could be malformed, so don't give them names currentSessionNumber/currentTOP as this can damage search bar with its parameters
+        return render(request, "error.html", {"inputSessionNumber": sessionNumber, "inputTOP": topNumber}, status=404) #session number and top could be malformed, so don't give them names currentSessionNumber/currentTOP as this can damage search bar with its parameters
 
     sessionURL, topTitle, topCategory, topBeschlussTenor = getMetaDataTOP(sessionNumber, topNumber)
 
@@ -124,9 +99,8 @@ def loadJSON(request):
     # Count number of different opinions 
     opinions = [opinion for (_, opinion, _) in countySenatTextAndOpinionAndPDFLink.values()] #exctract opinion from map
     numYES, numNO, numABSTENTION, numOTHER = countSizeParitionsOpinions(opinions)
-    sessionNumbers = getSessionNumbers()
 
-    return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "sessionNumbers": sessionNumbers, "currentSessionNumber": int(sessionNumber), "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER}) #If currentSessionNumber not int, then search bar gets reset to session 992 
+    return render(request, "json.html", {"diagramNumCounties": len(countySenatTextAndOpinionAndPDFLink), "currentSessionNumber": int(sessionNumber), "sessionURL": sessionURL,  "top": topNumber, "topTitle" : topTitle, "topCategory": topCategory, "topTenor": topBeschlussTenor, "countiesTextsAndOpinionsAndPDFLinks": countySenatTextAndOpinionAndPDFLink, "numYes": numYES, "numNo": numNO, "numAbstention": numABSTENTION, "numOther": numOTHER}) #If currentSessionNumber not int, then search bar gets reset to session 992 
 
 #Takes session number and TOP
 #Returns True if this session is present
@@ -437,8 +411,6 @@ def storeJSONResponseAsRowInTable(TableName, countyName, jsonResponse):
 # Returns all TOPs+Links that contain keyword
 def searchTOPTitles(request):
     initDBIfEmpty()
-    sessionNumbers = getSessionNumbers() #Always given to request
-
     try:
         searchString = request.GET["searchString"]
     except:
@@ -448,7 +420,7 @@ def searchTOPTitles(request):
     resultList = getMatchingTOPs(searchString)
 
     #TOP what happens with current session? 992?
-    return render(request, "searchTOPTitlesResults.html", {"sessionNumbers": sessionNumbers, "resultList": resultList, "searchString": searchString }) #If currentSessionNumber not int, then search bar gets reset to session 992 
+    return render(request, "searchTOPTitlesResults.html", {"resultList": resultList, "searchString": searchString }) #If currentSessionNumber not int, then search bar gets reset to session 992 
 
 
 # Return all TOPs that have searchString in title + More data
