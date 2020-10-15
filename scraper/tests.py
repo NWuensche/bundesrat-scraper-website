@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 
-from .views import index,loadJSON,metaStudies, getTopsAJAX #Needs __init__.py in same folder, else error when executing tests
+from .views import index,loadJSON,metaStudies, getTopsAJAX, searchTOPTitles #Needs __init__.py in same folder, else error when executing tests
 from .models import Json, JsonCountyPDFLinks
 import json
 
@@ -257,3 +257,34 @@ class Tests(TestCase):
         self.assertEqual(response.status_code, 404)
         topHTML = response.content.decode()
         self.assertTrue(topHTML == "{}") #Empty JSON
+
+    def testSearchTitlesStringGETParameterMissing(self):
+        request = self.factory.get("/searchTOPTitles")
+        request.user = AnonymousUser()
+
+        response = searchTOPTitles(request)
+        #self.assertEqual(response.status_code, 200)
+
+        searchHTML = response.content.decode()
+        self.assertTrue('Leider wurde keine Suchanfrage übergeben. Bitte suchen Sie erneut.' in searchHTML)
+
+    def testSearchTitlesNoResultsForString(self):
+        request = self.factory.get("/searchTOPTitles?searchString=Nothing")
+        request.user = AnonymousUser()
+
+        response = searchTOPTitles(request)
+        self.assertEqual(response.status_code, 200)
+
+        searchHTML = response.content.decode()
+        self.assertTrue('Keine Suchergebnisse für "Nothing" gefunden!' in searchHTML)
+
+    def testSearchTitlesSomeResultsForString(self):
+        request = self.factory.get("/searchTOPTitles?searchString=620%2F18") #Search 620/18, only one result
+        request.user = AnonymousUser()
+
+        response = searchTOPTitles(request)
+        self.assertEqual(response.status_code, 200)
+
+        searchHTML = response.content.decode()
+        self.assertTrue('620/18 Mitteilung der Kommission an das Europäische Parlament, den Europäischen Rat, den Rat, die Europäische Zentralbank, den Europäischen Wirtschafts- und Sozialausschuss und den Ausschuss der Regionen: Kapitalmarktunion - Zeit für neue Anstrengungen zugunsten konkreter Ergebnisse bei Investitionen, Wachstum und stärkerer Rolle des Euro' in searchHTML)
+        self.assertTrue('loadJSON?sessionNumber=974&topNumber=999c' in searchHTML) #Correct redirect link for search
