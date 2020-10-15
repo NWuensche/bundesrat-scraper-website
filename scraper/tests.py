@@ -61,8 +61,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
 
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar
-
         #Test meta data present and correct
         #self.assertTemplateUsed needs more setup (Django test Client), threrefore I check signal strings so that I know right template was used.
         self.assertTrue("TOP 992/4" in searchHTML)
@@ -91,8 +89,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
 
-        self.assertTrue('<option value="973" selected>Sitzung 973</option>' in searchHTML) #Check 992 as session selected in search bar
-
         #Test meta data present and correct
         self.assertTrue("TOP 973/25b" in searchHTML)
         self.assertTrue("Titel: 575/18 Entwurf eines Dreizehnten Gesetzes zur Änderung des Bundes-Immissionsschutzgesetzes" in searchHTML)
@@ -119,7 +115,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "973" existiert kein Tagesordnungspunkt "1337". Bitte suchen Sie erneut.' in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error, although 973 is valid session I don't check this at this point, so I don't give it as a parameter to the html file
 
     def testSearchResultTOPMissing(self):
         request = self.factory.get("/loadJSON?sessionNumber=973")
@@ -130,7 +125,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue("Leider wurde kein Tagesordnungspunkt übergeben. Bitte suchen Sie erneut." in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error, although 973 is valid session I don't check this at this point, so I don't give it as a parameter to the html file
 
     def testSearchResultSessionMissing(self):
         request = self.factory.get("/loadJSON?topNumber=1")
@@ -141,7 +135,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue("Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut." in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
 
     def testSearchResultSessionAndTOPMissing(self):
         request = self.factory.get("/loadJSON")
@@ -152,7 +145,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue("Leider wurde keine Sitzungsnummer übergeben. Bitte suchen Sie erneut." in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
 
     def testSearchResultBothPresentSessionMalformed(self):
         request = self.factory.get("/loadJSON?sessionNumber=a&topNumber=1")
@@ -163,7 +155,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "a" existiert kein Tagesordnungspunkt "1". Bitte suchen Sie erneut.' in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
 
     def testSearchResultBothPresentTOPMalformed(self):
         request = self.factory.get("/loadJSON?sessionNumber=990&topNumber=a")
@@ -174,7 +165,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "990" existiert kein Tagesordnungspunkt "a". Bitte suchen Sie erneut.' in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
 
     def testSearchResultBothPresentSessionTooLow(self):
         request = self.factory.get("/loadJSON?sessionNumber=909&topNumber=1")
@@ -185,7 +175,6 @@ class Tests(TestCase):
 
         searchHTML = response.content.decode()
         self.assertTrue('Für die Sitzung "909" existiert kein Tagesordnungspunkt "1". Bitte suchen Sie erneut.' in searchHTML)
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in searchHTML) #Check 992 as session selected in search bar after error
     
     def testMetaStudies(self):
         request = self.factory.get("/metaStudies")
@@ -195,8 +184,6 @@ class Tests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         metaHTML = response.content.decode()
-
-        self.assertTrue('<option value="992" selected>Sitzung 992</option>' in metaHTML) #Check 992 as session selected in search bar
 
         #Test Title correct
         self.assertTrue("Meta-Analysen der Bundesrats-Sitzungen 910 - {}".format(self.currentSession) in metaHTML)
