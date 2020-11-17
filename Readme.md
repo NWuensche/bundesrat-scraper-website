@@ -1,10 +1,10 @@
 # Unofficial Bundesrat Scraper - Website
 
-This is the UI for the [Bundesrat Scraper](https://github.com/okfde/bundesrat-scraper) data. You can check the behavior of the counties of Germany in the `Bundesrat` for a given session and `Tagesordnungspunkt`(TOP).  You can find a live demo [on Heroku](https://bundesrat-scraper-website.herokuapp.com/).
+This is the UI for the [Bundesrat Scraper](https://github.com/okfde/bundesrat-scraper) data. You can check the voting behavior of the 16 state governments of the german federated states in the `Bundesrat` for a given session and `Tagesordnungspunkt`(TOP). You can find a live demo [on Heroku](https://bundesrat-scraper-website.herokuapp.com/).
 
 The website and scraper, including the data, scraper and website code, are unofficial. The `Bundesrat` has nothing to do with it. There is no warranty that the scraped data is correct or complete or the website displays the correct information.
 
-You can search either for some keyword in all Tagesordnungspunkt(TOP) titles.
+You can search either for some keyword in all Tagesordnungspunkt (TOP) titles.
 
 ## Initialize
 
