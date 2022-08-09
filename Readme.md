@@ -17,7 +17,7 @@ The setup is optimized for Arch Linux, but should work with other Linux Distros 
 
 
 ```
-yay -S heroku-cli #Or use the package manager of your distro
+yay -S heroku-cli postgresql-libs #Or use the package manager of your distro
 python3 -m venv getting-started #Derived from template of Django on Heroku
 pip install -r requirements.txt
 python manage.py collectstatic
