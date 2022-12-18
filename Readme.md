@@ -1,6 +1,6 @@
 # Unofficial Bundesrat Scraper - Website
 
-This is the UI for the [Bundesrat Scraper](https://github.com/okfde/bundesrat-scraper) data. You can check the behavior of the counties of Germany in the `Bundesrat` for a given session and `Tagesordnungspunkt`(TOP).  You can find a live demo [on Render](https://bundesrat-scraper-website.onrender.com/).
+This is the UI for the [Bundesrat Scraper](https://github.com/okfde/bundesrat-scraper) data. You can check the behavior of the counties of Germany in the `Bundesrat` for a given session and `Tagesordnungspunkt`(TOP).  You can find a live demo [on Render](https://bundesrat-scraper-website.onrender.com/) (this might take 3-5 minutes).
 
 The website and scraper, including the data, scraper and website code, are unofficial. The `Bundesrat` has nothing to do with it. There is no warranty that the scraped data is correct or complete or the website displays the correct information.
 
