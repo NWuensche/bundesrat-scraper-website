@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('SECRET_DJANGO', 'u5m@4&#v8uapr1-a4xdj+wkq)g-h48x#h%0^_5s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "bundesrat-scraper-website.onrender.com"]
 
 
 # Application definition
