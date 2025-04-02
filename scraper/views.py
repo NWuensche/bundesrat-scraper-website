@@ -351,7 +351,7 @@ def getPartitionSizesZustimmLaws():
             topCategory = top.get("law_category", "")
             if topCategory == "Zustimmungsbedürftiges Gesetz":
                 tenor = top.get("beschlusstenor", "")
-                if tenor in ["Zustimmung; Entschließung", "Zustimmung; Entschließungen", "Feststellung, dass das Gesetz der Zustimmung des Bundesrates mit zwei Dritteln seiner Stimmen bedarf, Zustimmung, Entschließung", "Zustimmung", "Zustimung"]:
+                if tenor in ["Zustimmung; Entschließung", "Zustimmung; Entschließungen", "Feststellung, dass das Gesetz der Zustimmung des Bundesrates mit zwei Dritteln seiner Stimmen bedarf, Zustimmung, Entschließung", "Zustimmung", "Zustimung", "kein Antrag auf Einberufung des Vermittlungsausschusses; Entschließung"]:
                     numZustimmLawsYES += 1
                 elif tenor in ["Versagung der Zustimmung", "Anrufung des Vermittlungsausschusses", "Stellungnahme"]: #Stellungnahme from 948 1a, seems to be a NO
                     numZustimmLawsNO += 1
