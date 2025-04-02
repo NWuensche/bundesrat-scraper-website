@@ -53,24 +53,16 @@ The website currently fetches the JSON data from the [Bundesrat Scraper](https:/
 cd bundesrat-scraper-website
 rm db.sqlite3
 python3 manage.py migrate
-heroku local
+python3 manage.py runserver
 ```
-and visit the local website once to start fetching.
+and visit the local website once to start fetching. Note that its the okfde-data-repository, not the nwuensche-data-repository one :)
 
-#### Drop DB on Heroku
+#### Drop DB on Render
 
-```
-cd bundesrat-scraper-website
-heroku pg:reset --confirm APPNAME
-heroku run python manage.py migrate
-```
+drop locally
+push
+deploy in web ui
 and visit the website once to start fetching.
-
-##### See remaining dyno/free hours Heroku 
-
-```
-heroku ps -a bundesrat-scraper-website #replace bundesrat-scraper-website with your app name. App name irrelevant as long as it belongs to you.
-```
 
 ### Running the Test Suite
 
